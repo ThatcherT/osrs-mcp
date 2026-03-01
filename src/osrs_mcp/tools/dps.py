@@ -1,10 +1,15 @@
 """DPS calculator tools."""
+from collections import defaultdict
 from dataclasses import asdict
 from osrs_mcp.server import mcp
 from osrs_mcp.config import get_config
 from osrs_mcp.api.hiscores import fetch_hiscores
 from osrs_mcp.api.wiki_bucket import get_monster_info
-from osrs_mcp.util.data import find_equipment_by_name, find_monster_by_name
+from osrs_mcp.api.runelite_bank import get_bank
+from osrs_mcp.util.data import (
+    find_equipment_by_name, find_monster_by_name, load_equipment,
+    get_weapon_speed,
+)
 from osrs_mcp.dps.types import PlayerStats, GearSetup, Monster, DpsResult
 from osrs_mcp.dps.calc import (
     calculate_melee_dps, calculate_ranged_dps, calculate_magic_dps,
@@ -233,3 +238,240 @@ async def compare_weapons(
 
     results.sort(key=lambda r: r.get("dps", 0), reverse=True)
     return results
+
+
+# ---------------------------------------------------------------------------
+# suggest_loadout helpers
+# ---------------------------------------------------------------------------
+
+# Slots that hold armor (not weapon/2h/ammo)
+_ARMOR_SLOTS = {"head", "cape", "neck", "body", "legs", "feet", "hands",
+                "shield", "ring"}
+
+
+def _detect_combat_style(weapon: dict) -> tuple[str, str]:
+    """Determine combat style and attack type from a weapon's bonuses.
+
+    Returns (style, attack_type) where:
+      style: "melee" or "ranged"  (magic skipped per plan)
+      attack_type: "stab", "slash", "crush" for melee; "ranged" for ranged
+    """
+    arange = int(weapon.get("arange") or 0)
+    astab = int(weapon.get("astab") or 0)
+    aslash = int(weapon.get("aslash") or 0)
+    acrush = int(weapon.get("acrush") or 0)
+
+    # If ranged attack bonus is the highest positive bonus → ranged
+    melee_best = max(astab, aslash, acrush)
+    if arange > 0 and arange >= melee_best:
+        return ("ranged", "ranged")
+
+    # Melee: pick the highest melee attack type
+    if melee_best <= 0:
+        # No positive offensive bonus at all — default slash
+        return ("melee", "slash")
+
+    if astab >= aslash and astab >= acrush:
+        return ("melee", "stab")
+    elif aslash >= acrush:
+        return ("melee", "slash")
+    else:
+        return ("melee", "crush")
+
+
+def _best_armor_for_style(
+    items_by_slot: dict[str, list[dict]],
+    style: str,
+    is_2h: bool,
+) -> list[dict]:
+    """Pick best armor item per slot for a given combat style.
+
+    For melee: maximize 'str' (melee strength).
+    For ranged: maximize 'rstr' (ranged strength).
+    Returns list of equipment dicts (with bonuses).
+    """
+    if style == "ranged":
+        stat = "rstr"
+    else:
+        stat = "str"
+
+    armor = []
+    for slot in _ARMOR_SLOTS:
+        # 2h weapons can't use a shield
+        if is_2h and slot == "shield":
+            continue
+        items = items_by_slot.get(slot, [])
+        best = None
+        best_val = -999
+        for item in items:
+            bonuses = item.get("bonuses", {})
+            if not isinstance(bonuses, dict):
+                continue
+            val = bonuses.get(stat, 0)
+            if val > best_val:
+                best_val = val
+                best = item
+        if best is not None:
+            armor.append(best)
+    return armor
+
+
+def _detect_special_equipment(
+    weapon_name: str, monster: Monster,
+) -> str | None:
+    """Auto-detect special equipment effects based on weapon name and monster."""
+    name_lower = weapon_name.lower()
+    if "dragon hunter lance" in name_lower and monster.attribute == "dragon":
+        return "dragon_hunter_lance"
+    if "dragon hunter crossbow" in name_lower and monster.attribute == "dragon":
+        return "dragon_hunter_crossbow"
+    return None
+
+
+@mcp.tool()
+async def suggest_loadout(
+    monster: str,
+    username: str = "",
+    on_slayer_task: bool = False,
+) -> dict:
+    """Suggest the best weapon + armor loadouts from your bank against a monster.
+
+    Automatically tests every weapon/2h in your bank, pairs each with the best
+    armor for that combat style, runs the DPS calculator, and ranks by DPS.
+    Skips magic weapons (too many spell variables). Returns top 10 setups.
+
+    Args:
+        monster: Monster name (e.g. "Sarachnis", "Vorkath").
+        username: RuneScape username. Leave empty to use configured default.
+        on_slayer_task: Whether you are on a slayer task for this monster.
+    """
+    # Resolve username
+    if not username:
+        cfg = get_config()
+        username = cfg.username or ""
+    if not username:
+        raise ValueError("No username provided and none configured.")
+
+    # Fetch player stats, bank, monster in parallel-ish
+    mon = await _resolve_monster(monster)
+    stats = await _get_player_stats(username)
+    bank = await get_bank(username)
+    if bank is None:
+        return {"error": f"No bank data found for '{username}'."}
+
+    # Lazy import to avoid circular import (player.py imports server, server imports dps)
+    from osrs_mcp.tools.player import _enrich_bank_item
+
+    # Enrich bank items with equipment data
+    equipment = load_equipment()
+    enriched = [_enrich_bank_item(item, equipment) for item in bank]
+
+    # Organize by slot
+    by_slot: dict[str, list[dict]] = defaultdict(list)
+    for item in enriched:
+        slot = item.get("slot")
+        if slot and isinstance(item.get("bonuses"), dict):
+            by_slot[slot].append(item)
+
+    # Collect all weapons/2h from bank
+    weapons = by_slot.get("weapon", []) + by_slot.get("2h", [])
+    if not weapons:
+        return {"error": "No weapons found in bank."}
+
+    results = []
+    for weapon_item in weapons:
+        bonuses = weapon_item.get("bonuses", {})
+        if not isinstance(bonuses, dict):
+            continue
+
+        style, attack_type = _detect_combat_style(bonuses)
+
+        # Skip magic weapons
+        amagic = int(bonuses.get("amagic") or 0)
+        melee_best = max(
+            int(bonuses.get("astab") or 0),
+            int(bonuses.get("aslash") or 0),
+            int(bonuses.get("acrush") or 0),
+        )
+        arange = int(bonuses.get("arange") or 0)
+        if amagic > 0 and amagic > melee_best and amagic > arange:
+            continue
+
+        is_2h = weapon_item.get("slot") == "2h"
+
+        # Build gear: weapon + best armor for this style
+        armor_items = _best_armor_for_style(by_slot, style, is_2h)
+
+        # Build the full equipment list for _parse_gear
+        gear_dicts = [bonuses]  # weapon bonuses
+        # Add weapon speed
+        weapon_name = weapon_item.get("name", "")
+        speed = bonuses.get("speed")
+        if speed is None:
+            # Try to resolve speed from data
+            equip_data = find_equipment_by_name(weapon_name)
+            if equip_data:
+                speed = equip_data.get("speed")
+        if speed is not None:
+            gear_dicts[0] = dict(bonuses, speed=speed)
+
+        for armor in armor_items:
+            armor_bonuses = armor.get("bonuses", {})
+            if isinstance(armor_bonuses, dict):
+                gear_dicts.append(armor_bonuses)
+
+        gear_setup = _parse_gear(gear_dicts)
+
+        # Auto-detect special equipment
+        special = _detect_special_equipment(weapon_name, mon)
+
+        # Calculate DPS
+        try:
+            if style == "ranged":
+                result = calculate_ranged_dps(
+                    stats, gear_setup, mon,
+                    stance="rapid", prayer="rigour", potion="super_ranging",
+                    on_slayer_task=on_slayer_task,
+                    special_equipment=special,
+                )
+            else:
+                result = calculate_melee_dps(
+                    stats, gear_setup, mon,
+                    attack_type=attack_type, stance="aggressive",
+                    prayer="piety", potion="super_combat",
+                    on_slayer_task=on_slayer_task,
+                    special_equipment=special,
+                )
+        except Exception:
+            continue
+
+        # Build armor summary
+        gear_names = [a.get("name", "?") for a in armor_items]
+
+        results.append({
+            "weapon": weapon_name,
+            "style": style,
+            "attack_type": attack_type,
+            "dps": result.dps,
+            "accuracy": result.accuracy,
+            "max_hit": result.max_hit,
+            "ttk_seconds": result.ttk_seconds,
+            "attack_speed": result.attack_speed,
+            "armor": gear_names,
+            "special_equipment": special,
+        })
+
+    # Sort by DPS descending, take top 10
+    results.sort(key=lambda r: r["dps"], reverse=True)
+    top = results[:10]
+
+    return {
+        "monster": mon.name or monster,
+        "monster_hp": mon.hitpoints,
+        "username": username,
+        "top_loadouts": top,
+        "total_weapons_tested": len(results),
+        "note": "Melee uses aggressive stance + Piety + super combat. "
+                "Ranged uses rapid + Rigour + super ranging. "
+                "Magic weapons are excluded (spell choice needed).",
+    }
