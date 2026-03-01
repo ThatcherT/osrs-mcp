@@ -21,20 +21,23 @@ The user has 3 accounts: `die tmo`, `31k elite`, `thatcher98`. If they say "my i
 ### For gear/progression questions:
 1. `player_stats(username)` — get their levels + account type
 2. `player_gear(username, optimize="str")` — see their best gear for a specific stat
-3. `monster_info(boss)` — check boss stats and weaknesses
-4. `calc_dps(monster, weapon)` — calculate actual DPS with their stats
-5. `boss_requirements(boss)` — get boss info + drops
+3. `read_wiki_page("Boss/Strategies")` — read the wiki's recommended equipment and strategy. **Do this before recommending any gear for a boss.** Training data about what's "good" at a specific boss is often wrong.
+4. `monster_info(boss)` — check boss stats and weaknesses
+5. `calc_dps(monster, weapon, spell="Iban's Blast")` — calculate actual DPS with their stats. Use `spell` param for magic.
+6. `boss_requirements(boss)` — get boss info + drops
 
 ### For "what boss should I do?" questions:
 1. Get their stats with `player_stats`
 2. Get their best gear with `player_gear(username)` for an overview, or `player_gear(username, optimize="aslash")` for a specific setup
-3. Look up specific bosses with `monster_info` and `boss_requirements`
-4. Calculate DPS with `calc_dps` using their actual stats and gear
+3. Read wiki strategy pages with `read_wiki_page("Boss/Strategies")` — check recommended stats, gear, and mechanics
+4. Look up specific bosses with `monster_info` and `boss_requirements`
+5. Calculate DPS with `calc_dps` using their actual stats and gear
 
-### For "what should I wear?" questions:
-- Use `player_gear(username, optimize=stat)` to get the best item per slot
-- Pick the stat based on the boss: high-defence bosses → accuracy stat (aslash, acrush, astab); low-defence bosses → strength stat (str, rstr); magic → amagic
-- The loadout is built from items actually in their bank — no guessing
+### For "what should I wear?" / boss gear questions:
+- **Always read the wiki first**: `read_wiki_page("Boss Name/Strategies", "Recommended equipment")` or the relevant strategy section. The wiki's recommended gear is maintained by experienced players and accounts for boss-specific mechanics (e.g. ToA bosses hit through defence so Barrows melee armour is bad there, even though it's normally good mid-game gear).
+- **Never fill gear gaps from training data.** If the wiki doesn't recommend an item, don't recommend it. If you don't know what to suggest for a slot, say so — don't guess.
+- Use `player_gear(username, optimize=stat)` to see what they actually own
+- Cross-reference wiki recommendations against their bank to find the best gear they have that the wiki actually endorses
 
 ### For item/drop questions:
 - `drop_sources(item)` — what monsters drop this item
@@ -44,6 +47,7 @@ The user has 3 accounts: `die tmo`, `31k elite`, `thatcher98`. If they say "my i
 
 ### For DPS/weapon comparisons:
 - `compare_weapons(monster, "weapon1,weapon2,weapon3")` — side-by-side DPS comparison
+- For magic: use `spell` param, e.g. `calc_dps(monster, weapon, style="magic", spell="Iban's Blast")`
 - Always use the player's actual stats, not maxed defaults
 
 ## Important Game Mechanics
