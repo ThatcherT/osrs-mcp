@@ -6,14 +6,49 @@ from pathlib import Path
 DATA_DIR = Path(__file__).parent.parent.parent.parent / "data"
 
 
+# Variant suffixes in order of preference for base-name fallback.
+# If "karil's leathertop" is looked up, prefer the #100 or #undamaged variant.
+_PREFERRED_VARIANTS = ("#undamaged", "#100")
+
+
 @lru_cache(maxsize=1)
 def load_equipment() -> dict:
-    """Load equipment.json keyed by item ID string."""
+    """Load equipment.json keyed by lowercase item name.
+
+    Items with variant suffixes (e.g. "karil's leathertop#100") also get
+    registered under their base name ("karil's leathertop") so bank items
+    can be matched without knowing the charge/variant state.
+    """
     path = DATA_DIR / "equipment.json"
     if not path.exists():
         return {}
     with open(path) as f:
-        return json.load(f)
+        raw = json.load(f)
+
+    # Build base-name fallbacks for variant items
+    # Collect all variants per base name, then pick the best one
+    base_candidates: dict[str, list[tuple[str, dict]]] = {}
+    for key, val in raw.items():
+        if "#" in key:
+            base = key.split("#")[0]
+            if base not in raw:  # Don't override an exact entry
+                base_candidates.setdefault(base, []).append((key, val))
+
+    for base, candidates in base_candidates.items():
+        # Pick preferred variant
+        best = None
+        for pref in _PREFERRED_VARIANTS:
+            for cand_key, cand_val in candidates:
+                if cand_key.endswith(pref):
+                    best = cand_val
+                    break
+            if best:
+                break
+        if best is None:
+            best = candidates[0][1]  # Fall back to first found
+        raw[base] = best
+
+    return raw
 
 
 @lru_cache(maxsize=1)
