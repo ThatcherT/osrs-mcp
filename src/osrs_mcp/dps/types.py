@@ -47,6 +47,8 @@ class Monster:
     size: int = 1
     attribute: str = ""  # "dragon", "demon", "undead", etc.
     flat_armour: int = 0
+    elemental_weakness: str = ""  # "Fire", "Water", "Earth", "Air", or ""
+    elemental_weakness_percent: int = 0  # 0-100, bonus acc% + dmg% for matching spells
 
 
 @dataclass

@@ -242,12 +242,21 @@ def calculate_magic_dps(
     gear: GearSetup,
     monster: Monster,
     spell_max_hit: int = 24,  # base max hit of the spell
+    spell_element: str = "",  # "Fire", "Water", "Earth", "Air"
     prayer: str = "augury",
     potion: str = "saturated_heart",
     on_slayer_task: bool = False,
     special_equipment: str | None = None,
 ) -> DpsResult:
-    """Calculate magic DPS against a monster."""
+    """Calculate magic DPS against a monster.
+
+    Elemental weakness: If the spell element matches the monster's elemental
+    weakness, the player gains +X% accuracy and +X% damage where X is the
+    monster's elemental_weakness_percent. Per the wiki formula:
+      max_hit = floor(floor(base * (1 + magic_dmg%)) * (1 + slayer%))
+                + floor(base * elemental_weakness%)
+    And accuracy roll is multiplied by (1 + elemental_weakness%).
+    """
     eff_atk = effective_magic_level(stats, prayer, potion)
 
     atk = attack_roll(eff_atk, gear.amagic)
@@ -267,6 +276,15 @@ def calculate_magic_dps(
             atk = apply_special_multiplier(atk, special_equipment, True)
             max_h = apply_special_multiplier(max_h, special_equipment, False)
 
+    # Elemental weakness bonus: +X% acc and +floor(base * X%) damage
+    elem_pct = 0
+    if (spell_element and monster.elemental_weakness
+            and spell_element.lower() == monster.elemental_weakness.lower()
+            and monster.elemental_weakness_percent > 0):
+        elem_pct = monster.elemental_weakness_percent
+        atk = math.floor(atk * (100 + elem_pct) / 100)
+        max_h += math.floor(spell_max_hit * elem_pct / 100)
+
     acc = hit_chance(atk, def_r)
     speed = gear.speed
     dps = (acc * max_h / 2) / (speed * 0.6)
@@ -285,5 +303,7 @@ def calculate_magic_dps(
             "attack_roll": atk,
             "defence_roll": def_r,
             "spell_base_max": spell_max_hit,
+            "elemental_weakness": monster.elemental_weakness or "none",
+            "elemental_weakness_percent": elem_pct,
         },
     )

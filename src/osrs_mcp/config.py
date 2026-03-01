@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 class Config(BaseModel):
     username: str = ""
+    accounts: list[str] = []
     user_agent: str = "osrs-mcp/0.1.0 - OSRS MCP Server"
 
 

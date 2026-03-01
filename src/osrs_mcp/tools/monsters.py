@@ -12,6 +12,14 @@ from osrs_mcp.api.wiki_bucket import (
 async def monster_info(monster_name: str) -> dict:
     """Get detailed stats for an OSRS monster/boss (combat level, HP, attack/defence stats, weaknesses, slayer info).
 
+    The response includes elemental_weakness and elemental_weakness_percent if applicable.
+    Elemental weakness means using a matching standard spellbook spell (Strike/Bolt/Blast/Wave/Surge)
+    grants +X% magic accuracy AND +X% magic damage, where X = elemental_weakness_percent.
+    The four elements are Fire, Water, Earth, and Air. This does NOT affect melee/ranged, does NOT
+    apply to powered staves (Trident, Tumeken's shadow), and does NOT apply to non-elemental spells
+    (Ice Barrage, Flames of Zamorak, etc.). Dragon Hunter Lance/Crossbow bonuses are separate from
+    elemental weakness — they are special effects that work against any dragon regardless of element.
+
     Args:
         monster_name: The monster name (e.g. "Vorkath", "Abyssal demon", "General Graardor").
     """

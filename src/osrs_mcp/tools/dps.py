@@ -66,6 +66,8 @@ def _monster_to_obj(data: dict) -> Monster:
         size=max(1, _int("size")),
         attribute=str(data.get("attribute") or ""),
         flat_armour=_int("flat_armour"),
+        elemental_weakness=str(data.get("elemental_weakness") or ""),
+        elemental_weakness_percent=_int("elemental_weakness_percent"),
     )
 
 
@@ -130,6 +132,7 @@ async def calc_dps(
     on_slayer_task: bool = False,
     special_equipment: str = "",
     spell_max_hit: int = 0,
+    spell_element: str = "",
     username: str = "",
 ) -> dict:
     """Calculate DPS against a monster with given setup.
@@ -146,6 +149,10 @@ async def calc_dps(
         on_slayer_task: Whether you are on a slayer task for this monster.
         special_equipment: Special equipment effect (e.g. "dragon_hunter_lance", "salve_amulet_ei").
         spell_max_hit: Base max hit of spell (for magic only, e.g. 24 for Fire Surge).
+        spell_element: Element of the spell for elemental weakness bonus - "Fire", "Water", "Earth", or "Air".
+            Elemental weakness gives +X% accuracy and +X% damage when using a matching standard
+            spellbook spell (Strike/Bolt/Blast/Wave/Surge). Does NOT apply to non-elemental spells
+            like Flames of Zamorak, Ice Barrage, or powered staves (Trident, Tumeken's shadow).
         username: Username for stats lookup. Empty uses config or maxed stats.
     """
     mon = await _resolve_monster(monster)
@@ -168,6 +175,7 @@ async def calc_dps(
         result = calculate_magic_dps(
             stats, gear_setup, mon,
             spell_max_hit=spell_max_hit or 24,
+            spell_element=spell_element,
             prayer=prayer, potion=potion,
             on_slayer_task=on_slayer_task, special_equipment=special_equipment or None,
         )

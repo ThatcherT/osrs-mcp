@@ -1,0 +1,42 @@
+======================================================================
+  OSRS MCP - User Acceptance Test Report
+  Based on 241 real Reddit player questions
+======================================================================
+
+  Overall: 47/47 passed (100%)
+
+Category         Questions   Tests   Pass   Fail Status
+----------------------------------------------------------------------
+  [+] bossing           63         7      7      0
+  [+] dps               14         5      5      0
+  [+] drops             11         5      5      0
+  [+] gear              70         6      6      0
+  [+] money_making      28         3      3      0
+  [+] prices             6         3      3      0
+  [+] progression       22         4      4      0
+  [+] quests            15         4      4      0
+  [+] slayer            12         4      4      0
+  [+] wiki_search        0         2      2      0
+  [+] workflow           0         4      4      0
+----------------------------------------------------------------------
+
+  Tool Coverage:
+    [+] boss_requirements
+    [+] calc_dps
+    [+] compare_weapons
+    [+] drop_sources
+    [+] item_info
+    [+] item_price
+    [+] money_making_methods
+    [+] monster_drops
+    [+] monster_info
+    [+] player_gains
+    [+] player_stats
+    [+] quest_info
+    [+] search_items
+    [+] search_monsters
+    [+] search_wiki
+
+  Tools covered: 15/15 (100%)
+
+======================================================================
