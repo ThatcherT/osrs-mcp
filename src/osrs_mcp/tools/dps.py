@@ -8,7 +8,7 @@ from osrs_mcp.api.wiki_bucket import get_monster_info
 from osrs_mcp.api.runelite_bank import get_bank
 from osrs_mcp.util.data import (
     find_equipment_by_name, find_monster_by_name, load_equipment,
-    get_weapon_speed,
+    get_weapon_speed, find_spell,
 )
 from osrs_mcp.dps.types import PlayerStats, GearSetup, Monster, DpsResult
 from osrs_mcp.dps.calc import (
@@ -136,6 +136,7 @@ async def calc_dps(
     gear: str = "",
     on_slayer_task: bool = False,
     special_equipment: str = "",
+    spell: str = "",
     spell_max_hit: int = 0,
     spell_element: str = "",
     username: str = "",
@@ -153,7 +154,9 @@ async def calc_dps(
         gear: Comma-separated gear names (e.g. "Fighter torso,Bandos tassets,Primordial boots").
         on_slayer_task: Whether you are on a slayer task for this monster.
         special_equipment: Special equipment effect (e.g. "dragon_hunter_lance", "salve_amulet_ei").
-        spell_max_hit: Base max hit of spell (for magic only, e.g. 24 for Fire Surge).
+        spell: Spell name for magic (e.g. "Iban's Blast", "Fire Surge", "Ice Barrage").
+            Auto-resolves max hit and element. Overrides spell_max_hit/spell_element if set.
+        spell_max_hit: Base max hit of spell (manual override, e.g. 24 for Fire Surge).
         spell_element: Element of the spell for elemental weakness bonus - "Fire", "Water", "Earth", or "Air".
             Elemental weakness gives +X% accuracy and +X% damage when using a matching standard
             spellbook spell (Strike/Bolt/Blast/Wave/Surge). Does NOT apply to non-elemental spells
@@ -162,6 +165,15 @@ async def calc_dps(
     """
     mon = await _resolve_monster(monster)
     stats = await _get_player_stats(username or None)
+
+    # Auto-resolve spell name to max_hit and element
+    if spell and style == "magic":
+        spell_data = find_spell(spell)
+        if spell_data:
+            if not spell_max_hit:
+                spell_max_hit = spell_data["max_hit"]
+            if not spell_element:
+                spell_element = spell_data["element"]
 
     # Build gear setup from weapon + other gear
     gear_names = [weapon]
@@ -192,6 +204,8 @@ async def calc_dps(
         )
 
     result.weapon = weapon
+    if spell:
+        result.weapon = f"{weapon} ({spell})"
     return asdict(result)
 
 
@@ -206,6 +220,7 @@ async def compare_weapons(
     potion: str = "super_combat",
     gear: str = "",
     on_slayer_task: bool = False,
+    spell: str = "",
     username: str = "",
 ) -> list[dict]:
     """Compare DPS of multiple weapons against the same monster.
@@ -220,6 +235,7 @@ async def compare_weapons(
         potion: Potion name.
         gear: Comma-separated other gear names (applied to all weapons).
         on_slayer_task: Whether on slayer task.
+        spell: Spell name for magic (e.g. "Iban's Blast", "Fire Surge"). Auto-resolves max hit and element.
         username: Username for stats lookup.
     """
     weapon_list = [w.strip() for w in weapons.split(",") if w.strip()]
@@ -230,7 +246,7 @@ async def compare_weapons(
                 monster=monster, weapon=weapon, style=style,
                 attack_type=attack_type, stance=stance, prayer=prayer,
                 potion=potion, gear=gear, on_slayer_task=on_slayer_task,
-                username=username,
+                spell=spell, username=username,
             )
             results.append(result)
         except Exception as e:

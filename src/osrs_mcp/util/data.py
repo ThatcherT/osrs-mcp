@@ -71,6 +71,56 @@ def load_spells() -> dict:
         return json.load(f)
 
 
+def find_spell(name: str) -> dict | None:
+    """Find a spell by name (case-insensitive, fuzzy).
+
+    Returns dict with 'name', 'max_hit', 'element' (inferred from name).
+    """
+    spells = load_spells()
+    lower = name.lower().strip()
+
+    # Exact key match
+    spell = spells.get(lower)
+    # Scan values for display name match
+    if spell is None:
+        for v in spells.values():
+            if v.get("name", "").lower() == lower:
+                spell = v
+                break
+    # Substring match
+    if spell is None:
+        for k, v in spells.items():
+            if lower in k or lower in v.get("name", "").lower():
+                spell = v
+                break
+
+    if spell is None or spell.get("max_hit") is None:
+        return None
+
+    # Infer element from spell name
+    spell_name = spell.get("name", "")
+    element = _infer_element(spell_name)
+
+    return {
+        "name": spell_name,
+        "max_hit": spell["max_hit"],
+        "element": element,
+        "spellbook": spell.get("spellbook", ""),
+    }
+
+
+_ELEMENT_PREFIXES = {
+    "fire": "Fire", "water": "Water", "earth": "Earth",
+    "wind": "Wind", "air": "Air",
+}
+
+
+def _infer_element(spell_name: str) -> str:
+    """Infer element from spell name (Fire Surge -> 'Fire', etc.)."""
+    first_word = spell_name.lower().split()[0] if spell_name else ""
+    return _ELEMENT_PREFIXES.get(first_word, "")
+
+
 def find_equipment_by_name(name: str) -> dict | None:
     """Find equipment by name (case-insensitive). Adds weapon speed if known."""
     equipment = load_equipment()
