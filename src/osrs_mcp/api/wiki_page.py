@@ -190,12 +190,12 @@ async def fetch_page_sections(page: str) -> list[dict]:
     return sections
 
 
-async def fetch_page_content(page: str, section: int | None = None) -> str:
+async def fetch_page_content(page: str, section: int | str | None = None) -> str:
     """Fetch HTML for a page (or one section) and convert to text.
 
     Args:
         page: Wiki page title.
-        section: Section index (0 = intro only). None = full page.
+        section: Section index (0 = intro, "T-2" for transcluded). None = full page.
     """
     cache_key = f"wiki_content:{page}:{section}"
     cached = cache.get(cache_key)
@@ -227,17 +227,30 @@ async def fetch_page_content(page: str, section: int | None = None) -> str:
     return text
 
 
-def _resolve_section(sections: list[dict], section: str) -> int | None:
-    """Resolve a section name or index string to a numeric section index.
+def _parse_section_index(index_str: str) -> int | None:
+    """Parse a section index string like "3" or "T-2" to an int for the API.
 
-    Tries exact match, then case-insensitive, then substring.
-    Also accepts a raw integer string like "3".
+    MediaWiki uses "T-N" for transcluded table sections. These are valid
+    API section indices when passed as strings, but we return them as-is
+    since the API accepts the raw string.
     """
-    # Raw index
+    try:
+        return int(index_str)
+    except (ValueError, TypeError):
+        return None
+
+
+def _resolve_section(sections: list[dict], section: str) -> str | None:
+    """Resolve a section name or index string to a section index string.
+
+    Returns the raw index string (e.g. "3" or "T-2") for the MediaWiki API.
+    Tries exact match, then case-insensitive, then substring.
+    Also accepts a raw index string like "3".
+    """
+    # Raw index — check if it matches any section's index exactly
     if section.isdigit():
-        idx = int(section)
-        if any(s["index"] == str(idx) for s in sections):
-            return idx
+        if any(s["index"] == section for s in sections):
+            return section
         return None
 
     name = section.strip()
@@ -245,18 +258,18 @@ def _resolve_section(sections: list[dict], section: str) -> int | None:
     # Exact match
     for s in sections:
         if s["name"] == name:
-            return int(s["index"])
+            return s["index"]
 
     # Case-insensitive match
     lower = name.lower()
     for s in sections:
         if s["name"].lower() == lower:
-            return int(s["index"])
+            return s["index"]
 
     # Substring / fuzzy match
     for s in sections:
         if lower in s["name"].lower():
-            return int(s["index"])
+            return s["index"]
 
     return None
 

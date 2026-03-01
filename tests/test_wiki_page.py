@@ -147,23 +147,37 @@ class TestResolveSection:
         {"index": "4", "level": "3", "name": "Melee strategy"},
     ]
 
+    SECTIONS_WITH_T = [
+        {"index": "1", "level": "2", "name": "Drops"},
+        {"index": "T-1", "level": "3", "name": "100%"},
+        {"index": "T-2", "level": "3", "name": "Pre-roll"},
+        {"index": "T-3", "level": "3", "name": "Weapons and armour"},
+        {"index": "2", "level": "2", "name": "Strategy"},
+    ]
+
     def test_exact_name(self):
-        assert _resolve_section(self.SECTIONS, "Strategy") == 1
+        assert _resolve_section(self.SECTIONS, "Strategy") == "1"
 
     def test_case_insensitive(self):
-        assert _resolve_section(self.SECTIONS, "strategy") == 1
+        assert _resolve_section(self.SECTIONS, "strategy") == "1"
 
     def test_substring_match(self):
-        assert _resolve_section(self.SECTIONS, "Unique drop") == 3
+        assert _resolve_section(self.SECTIONS, "Unique drop") == "3"
 
     def test_by_index(self):
-        assert _resolve_section(self.SECTIONS, "2") == 2
+        assert _resolve_section(self.SECTIONS, "2") == "2"
 
     def test_not_found(self):
         assert _resolve_section(self.SECTIONS, "Nonexistent") is None
 
     def test_invalid_index(self):
         assert _resolve_section(self.SECTIONS, "99") is None
+
+    def test_t_index_by_name(self):
+        assert _resolve_section(self.SECTIONS_WITH_T, "Pre-roll") == "T-2"
+
+    def test_t_index_substring(self):
+        assert _resolve_section(self.SECTIONS_WITH_T, "Weapons") == "T-3"
 
 
 # ---------------------------------------------------------------------------

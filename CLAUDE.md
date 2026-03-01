@@ -44,6 +44,7 @@ The user has 3 accounts: `die tmo`, `31k elite`, `thatcher98`. If they say "my i
 - `monster_drops(monster)` — what a monster drops
 - `item_info(item)` — full item details and bonuses
 - `item_price(item)` — current GE price
+- **NEVER state that a monster drops a specific item without verifying with `monster_drops()` or `drop_sources()`.** Training data is full of wrong drop attributions (e.g. Blood shard comes from Vyrewatch Sentinels, not Undead Druids). Always verify.
 
 ### For DPS/weapon comparisons:
 - `compare_weapons(monster, "weapon1,weapon2,weapon3")` — side-by-side DPS comparison
