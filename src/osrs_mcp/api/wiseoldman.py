@@ -19,11 +19,14 @@ async def fetch_player_gains(username: str, period: str = "week") -> dict:
 
     if resp.status_code == 404:
         # Player not tracked yet - try to track them first
-        await client.post(f"{WOM_BASE}/players/{username}")
-        resp = await client.get(
-            f"{WOM_BASE}/players/{username}/gained",
-            params={"period": period},
-        )
+        try:
+            await client.post(f"{WOM_BASE}/players/{username}")
+            resp = await client.get(
+                f"{WOM_BASE}/players/{username}/gained",
+                params={"period": period},
+            )
+        except Exception:
+            pass  # Fall through to raise_for_status on original 404
 
     resp.raise_for_status()
     data = resp.json()

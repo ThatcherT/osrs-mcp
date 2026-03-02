@@ -187,7 +187,12 @@ async def get_item_info(item_name: str) -> dict | None:
 
 
 async def get_monster_info(monster_name: str) -> dict | None:
-    """Get monster info from infobox_monster. Returns highest combat level version."""
+    """Get monster info from infobox_monster. Returns highest combat level version.
+
+    Many bosses have a weaker quest/tutorial version and a stronger post-quest
+    version (e.g. Vorkath 392 quest vs 732 normal). The highest combat level
+    is typically the version players actually fight for drops.
+    """
     results = await bucket_query(
         "infobox_monster",
         fields=MONSTER_FIELDS,
@@ -196,7 +201,7 @@ async def get_monster_info(monster_name: str) -> dict | None:
     )
     if not results:
         return None
-    # Return the version with the highest combat level (boss version, not quest)
+    # Return the version with the highest combat level (post-quest / boss version)
     best = results[0]
     for r in results[1:]:
         try:

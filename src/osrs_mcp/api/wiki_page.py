@@ -248,12 +248,13 @@ def _resolve_section(sections: list[dict], section: str) -> str | None:
     Also accepts a raw index string like "3".
     """
     # Raw index — check if it matches any section's index exactly
-    if section.isdigit():
-        if any(s["index"] == section for s in sections):
-            return section
-        return None
+    # Handles both numeric ("3") and transcluded ("T-2") indices
+    stripped = section.strip()
+    for s in sections:
+        if s["index"] == stripped:
+            return stripped
 
-    name = section.strip()
+    name = stripped
 
     # Exact match
     for s in sections:

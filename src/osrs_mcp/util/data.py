@@ -71,9 +71,21 @@ def load_spells() -> dict:
         return json.load(f)
 
 
+def _strip_punctuation(s: str) -> str:
+    """Strip possessives and hyphens for fuzzy matching.
+
+    "iban's blast" -> "iban blast", "ahrim's robeskirt" -> "ahrim robeskirt"
+    """
+    import re
+    s = re.sub(r"['']s\b", "", s)  # strip possessive 's
+    s = s.replace("'", "").replace("'", "")  # strip remaining apostrophes
+    return s.replace("-", " ")
+
+
 def find_spell(name: str) -> dict | None:
     """Find a spell by name (case-insensitive, fuzzy).
 
+    Handles missing punctuation (e.g. "Iban Blast" matches "Iban's Blast").
     Returns dict with 'name', 'max_hit', 'element' (inferred from name).
     """
     spells = load_spells()
@@ -85,6 +97,13 @@ def find_spell(name: str) -> dict | None:
     if spell is None:
         for v in spells.values():
             if v.get("name", "").lower() == lower:
+                spell = v
+                break
+    # Punctuation-stripped match ("iban blast" -> "ibans blast" matches "iban's blast")
+    if spell is None:
+        stripped = _strip_punctuation(lower)
+        for k, v in spells.items():
+            if _strip_punctuation(k) == stripped or _strip_punctuation(v.get("name", "").lower()) == stripped:
                 spell = v
                 break
     # Substring match
@@ -111,7 +130,7 @@ def find_spell(name: str) -> dict | None:
 
 _ELEMENT_PREFIXES = {
     "fire": "Fire", "water": "Water", "earth": "Earth",
-    "wind": "Wind", "air": "Air",
+    "wind": "Air", "air": "Air",  # Wind spells are Air element
 }
 
 
@@ -175,6 +194,23 @@ WEAPON_SPEED_OVERRIDES = {
     "zamorak godsword": 6, "saradomin godsword": 6,
     "elder maul": 6, "dragon warhammer": 6,
 }
+
+
+@lru_cache(maxsize=1)
+def load_skilling_rates() -> dict:
+    """Load skilling_rates.json keyed by lowercase skill name."""
+    path = DATA_DIR / "skilling_rates.json"
+    if not path.exists():
+        return {}
+    with open(path) as f:
+        return json.load(f)
+
+
+def find_skilling_methods(skill: str, min_level: int = 1) -> list[dict]:
+    """Return training methods for a skill that the player can use at min_level."""
+    rates = load_skilling_rates()
+    methods = rates.get(skill.lower(), [])
+    return [m for m in methods if m.get("level_req", 1) <= min_level]
 
 
 def get_weapon_speed(name: str, combat_style: str) -> int | None:

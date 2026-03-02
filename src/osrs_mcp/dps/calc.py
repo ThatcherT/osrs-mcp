@@ -142,15 +142,25 @@ def calculate_melee_dps(
     max_h = melee_max_hit(eff_str, gear.melee_str)
 
     # Apply special equipment
-    if on_slayer_task:
+    # Salve amulet and slayer helm do NOT stack — salve takes priority when applicable
+    salve_active = (special_equipment and "salve" in special_equipment
+                    and monster.attribute == "undead")
+
+    if salve_active:
+        atk = apply_special_multiplier(atk, special_equipment, True)
+        max_h = apply_special_multiplier(max_h, special_equipment, False)
+    elif on_slayer_task:
         atk = apply_special_multiplier(atk, "slayer_helm", True)
         max_h = apply_special_multiplier(max_h, "slayer_helm", False)
 
-    if special_equipment:
-        if special_equipment in ("dragon_hunter_lance",) and monster.attribute == "dragon":
+    if special_equipment and not salve_active:
+        if special_equipment == "dragon_hunter_lance" and monster.attribute == "dragon":
             atk = apply_special_multiplier(atk, special_equipment, True)
             max_h = apply_special_multiplier(max_h, special_equipment, False)
-        elif "salve" in special_equipment and monster.attribute == "undead":
+        elif special_equipment == "arclight" and monster.attribute == "demon":
+            atk = apply_special_multiplier(atk, special_equipment, True)
+            max_h = apply_special_multiplier(max_h, special_equipment, False)
+        elif special_equipment == "keris_partisan" and monster.attribute == "kalphite":
             atk = apply_special_multiplier(atk, special_equipment, True)
             max_h = apply_special_multiplier(max_h, special_equipment, False)
         elif "void" in special_equipment:
@@ -198,15 +208,19 @@ def calculate_ranged_dps(
 
     max_h = ranged_max_hit(eff_str, gear.ranged_str)
 
-    if on_slayer_task:
+    # Salve amulet and slayer helm do NOT stack — salve takes priority when applicable
+    salve_active = (special_equipment and "salve" in special_equipment
+                    and monster.attribute == "undead")
+
+    if salve_active:
+        atk = apply_special_multiplier(atk, special_equipment, True)
+        max_h = apply_special_multiplier(max_h, special_equipment, False)
+    elif on_slayer_task:
         atk = apply_special_multiplier(atk, "slayer_helm_i", True)
         max_h = apply_special_multiplier(max_h, "slayer_helm_i", False)
 
-    if special_equipment:
+    if special_equipment and not salve_active:
         if special_equipment == "dragon_hunter_crossbow" and monster.attribute == "dragon":
-            atk = apply_special_multiplier(atk, special_equipment, True)
-            max_h = apply_special_multiplier(max_h, special_equipment, False)
-        elif "salve" in special_equipment and monster.attribute == "undead":
             atk = apply_special_multiplier(atk, special_equipment, True)
             max_h = apply_special_multiplier(max_h, special_equipment, False)
         elif "void" in special_equipment:
@@ -264,15 +278,19 @@ def calculate_magic_dps(
 
     max_h = magic_max_hit(spell_max_hit, gear.magic_dmg)
 
-    if on_slayer_task:
+    # Salve amulet and slayer helm do NOT stack — salve takes priority when applicable
+    salve_active = (special_equipment and "salve" in special_equipment
+                    and monster.attribute == "undead")
+
+    if salve_active:
+        atk = apply_special_multiplier(atk, special_equipment, True)
+        max_h = apply_special_multiplier(max_h, special_equipment, False)
+    elif on_slayer_task:
         atk = apply_special_multiplier(atk, "slayer_helm_i", True)
         max_h = apply_special_multiplier(max_h, "slayer_helm_i", False)
 
-    if special_equipment:
-        if "salve" in special_equipment and monster.attribute == "undead":
-            atk = apply_special_multiplier(atk, special_equipment, True)
-            max_h = apply_special_multiplier(max_h, special_equipment, False)
-        elif "void" in special_equipment:
+    if special_equipment and not salve_active:
+        if "void" in special_equipment:
             atk = apply_special_multiplier(atk, special_equipment, True)
             max_h = apply_special_multiplier(max_h, special_equipment, False)
 

@@ -10,7 +10,7 @@ MELEE_PRAYERS = {
     "improved_reflexes": (23, 20, 1, 1),
     "ultimate_strength": (1, 1, 27, 20),
     "incredible_reflexes": (27, 20, 1, 1),
-    "chivalry": (3, 2, 23, 15),  # 1.15 atk, 1.18 str → approximated
+    "chivalry": (23, 20, 59, 50),  # 1.15 atk, 1.18 str
     "piety": (6, 5, 123, 100),  # 1.20 atk, 1.23 str
 }
 
@@ -27,7 +27,7 @@ MAGIC_PRAYERS = {
     "mystic_will": (21, 20),
     "mystic_lore": (23, 20),
     "mystic_might": (27, 20),
-    "augury": (6, 5),  # 1.25 → use 5/4? Actually augury is 1.25
+    "augury": (5, 4),  # 1.25 accuracy
 }
 
 # Potion boosts: (flat_add, level_percent_add)
@@ -85,4 +85,6 @@ SPECIAL_EQUIPMENT = {
     "elite_void_magic": (29, 20, 21, 20),  # 1.45 acc, 2.5% dmg
     "dragon_hunter_lance": (6, 5, 6, 5),   # 1.20 vs dragons
     "dragon_hunter_crossbow": (13, 10, 5, 4),  # 1.30 acc, 1.25 dmg vs dragons
+    "arclight": (17, 10, 17, 10),          # 1.70 acc, 1.70 dmg vs demons
+    "keris_partisan": (4, 3, 4, 3),        # 1.33 acc, 1.33 dmg vs kalphites
 }

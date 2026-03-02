@@ -170,7 +170,7 @@ class TestWikiBucketAPI:
         )
         result = await wiki_bucket.get_monster_info("Vorkath")
         assert result is not None
-        assert result["combat_level"] == 732  # Highest version
+        assert result["combat_level"] == 732  # Post-quest version (highest)
 
     @respx.mock
     async def test_get_monster_info_not_found(self):

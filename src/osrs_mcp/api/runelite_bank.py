@@ -170,6 +170,15 @@ async def get_bank(username: str) -> list[dict] | None:
     """Get bank contents with item names resolved.
 
     Returns list of {item_id, name, quantity} dicts sorted by quantity desc.
+
+    Handles two common quirks of RuneLite's raw bank data:
+
+    * **Bank placeholders** — OSRS stores empty placeholder slots as separate
+      internal item IDs (typically in the 14k-19k range) that don't appear in
+      any public item database.  These are filtered out.
+    * **Noted / charged variants** — Items whose ID is one above a known base
+      item (the standard OSRS noted-item pattern) are resolved to the base
+      item's name with a "(noted)" suffix.
     """
     raw = get_bank_raw(username)
     if raw is None:
@@ -179,7 +188,17 @@ async def get_bank(username: str) -> list[dict] | None:
 
     bank = []
     for item_id, qty in raw:
-        name = id_to_name.get(item_id, f"Unknown item ({item_id})")
+        name = id_to_name.get(item_id)
+
+        if name is None:
+            # Try noted-item pattern: base item is id - 1
+            base_name = id_to_name.get(item_id - 1)
+            if base_name:
+                name = f"{base_name} (noted)"
+            else:
+                # Unresolvable — almost certainly a bank placeholder slot
+                continue
+
         bank.append({
             "item_id": item_id,
             "name": name,

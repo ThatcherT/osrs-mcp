@@ -20,8 +20,11 @@ def get_config() -> Config:
 
     config_path = Path(__file__).parent.parent.parent / "config.json"
     if config_path.exists():
-        with open(config_path) as f:
-            _config = Config(**json.load(f))
+        try:
+            with open(config_path) as f:
+                _config = Config(**json.load(f))
+        except (json.JSONDecodeError, TypeError, ValueError):
+            _config = Config()
     else:
         _config = Config()
     return _config

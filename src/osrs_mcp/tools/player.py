@@ -50,14 +50,28 @@ _BONUS_KEYS = ("astab", "aslash", "acrush", "arange", "amagic",
 
 
 def _enrich_bank_item(item: dict, equipment: dict) -> dict:
-    """Add equipment slot and combat bonuses to a bank item if it's equipment."""
-    equip = equipment.get(item["name"].lower())
+    """Add equipment slot and combat bonuses to a bank item if it's equipment.
+
+    For charged/degradeable items (e.g. Crystal shield, Sanguinesti staff) the
+    base name often has all-zero stats while the ``name#active`` variant holds
+    the real combat bonuses.  When the base item has no offensive/defensive
+    stats we fall back to the ``#active`` variant automatically.
+    """
+    name_lower = item["name"].lower()
+    equip = equipment.get(name_lower)
     if equip is None:
         return item
 
     slot = equip.get("slot")
     if not slot:
         return item
+
+    # If the base item has all-zero combat stats, try the #active variant
+    has_stats = any(equip.get(k) for k in _BONUS_KEYS)
+    if not has_stats:
+        active = equipment.get(f"{name_lower}#active")
+        if active and active.get("slot"):
+            equip = active
 
     item = dict(item)
     item["slot"] = slot
@@ -102,21 +116,26 @@ _SLOT_ORDER = ["head", "cape", "neck", "body", "legs", "feet", "hands",
 
 
 def _best_per_slot(items_by_slot: dict[str, list[dict]], stat: str) -> dict:
-    """For each slot, find the single best item for the given stat."""
+    """For each slot, find the single best item for the given stat.
+
+    Returns the item with the highest value for ``stat`` in each slot,
+    even if all values are negative (the least-negative item wins).
+    Only skips a slot if it has no items with valid bonuses at all.
+    """
     result = {}
     for slot in _SLOT_ORDER:
         items = items_by_slot.get(slot, [])
         best = None
-        best_val = 0
+        best_val = None
         for item in items:
             bonuses = item.get("bonuses", {})
             if not isinstance(bonuses, dict):
                 continue
             val = bonuses.get(stat, 0)
-            if val > best_val:
+            if best_val is None or val > best_val:
                 best_val = val
                 best = item
-        if best and best_val > 0:
+        if best is not None:
             result[slot] = {"name": best["name"], stat: best_val,
                             "bonuses": best["bonuses"]}
     return result

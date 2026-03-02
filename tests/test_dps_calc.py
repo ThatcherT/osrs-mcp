@@ -124,10 +124,10 @@ class TestEffectiveRangedLevel:
 class TestEffectiveMagicLevel:
     def test_maxed_augury_saturated(self, maxed_stats):
         # boosted = 99 + 2 + floor(99*10/100) = 110
-        # augury = floor(110 * 6/5) = floor(132) = 132
-        # effective = 132 + 9 = 141
+        # augury = floor(110 * 5/4) = floor(137.5) = 137
+        # effective = 137 + 9 = 146
         result = effective_magic_level(maxed_stats, "augury", "saturated_heart")
-        assert result == 141
+        assert result == 146
 
     def test_no_prayer_no_pot(self, maxed_stats):
         # boosted = 99, floor(99*1/1) = 99
