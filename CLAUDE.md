@@ -1,9 +1,15 @@
 # OSRS MCP Server — Claude Code Instructions
 
 ## Golden Rule
-**ALWAYS use the MCP tools to answer OSRS questions. Never rely on training data alone.**
+**You have OSRS MCP tools available in this session. USE THEM to answer OSRS questions.**
+The tools are registered as MCP tools (e.g. `player_stats`, `boss_setup`, `calc_dps`, etc.).
+Call them directly — do NOT try to answer OSRS questions by reading source code or using training data.
 Your training data is outdated and often wrong about specific stats, prices, drop rates, and meta.
 The MCP tools have live data — use them.
+
+**This is a codebase for the MCP server AND the server is running as a connected MCP tool provider.**
+When the user asks an OSRS gameplay question, call the MCP tools. Do not say "I don't have the tools connected" —
+they ARE connected. Check `/mcp` if unsure.
 
 ## Before Answering Any OSRS Question
 1. **Check the player's account first.** Call `player_stats` to get their levels, boss KCs, and account type (normal/ironman/hardcore/ultimate). This tells you what content they can actually do.
@@ -45,6 +51,11 @@ The user has 3 accounts: `die tmo`, `31k elite`, `thatcher98`. If they say "my i
 - `item_info(item)` — full item details and bonuses
 - `item_price(item)` — current GE price
 - **NEVER state that a monster drops a specific item without verifying with `monster_drops()` or `drop_sources()`.** Training data is full of wrong drop attributions (e.g. Blood shard comes from Vyrewatch Sentinels, not Undead Druids). Always verify.
+
+### For "what's my KPH?" / boss setup questions:
+1. `boss_setup(boss, username)` — tests every weapon in their bank, picks best prayer/potion for their level, shows top 5 setups with DPS + KPH + weakness analysis
+2. Can filter by style: `boss_setup(boss, username, style="ranged")`
+3. For magic setups: `boss_setup(boss, username, style="magic", spell="Fire Surge")`
 
 ### For DPS/weapon comparisons:
 - `compare_weapons(monster, "weapon1,weapon2,weapon3")` — side-by-side DPS comparison
