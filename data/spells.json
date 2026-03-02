@@ -1,0 +1,941 @@
+{
+  "fire blast": {
+    "name": "Fire Blast",
+    "spellbook": "normal",
+    "max_hit": 16
+  },
+  "fire bolt": {
+    "name": "Fire Bolt",
+    "spellbook": "normal",
+    "max_hit": 12
+  },
+  "fire wave": {
+    "name": "Fire Wave",
+    "spellbook": "normal",
+    "max_hit": 20
+  },
+  "ice barrage": {
+    "name": "Ice Barrage",
+    "spellbook": "ancient",
+    "max_hit": 30
+  },
+  "ice blitz": {
+    "name": "Ice Blitz",
+    "spellbook": "ancient",
+    "max_hit": 26
+  },
+  "ice burst": {
+    "name": "Ice Burst",
+    "spellbook": "ancient",
+    "max_hit": 22
+  },
+  "ice rush": {
+    "name": "Ice Rush",
+    "spellbook": "ancient",
+    "max_hit": 18
+  },
+  "high level alchemy": {
+    "name": "High Level Alchemy",
+    "spellbook": "normal"
+  },
+  "low level alchemy": {
+    "name": "Low Level Alchemy",
+    "spellbook": "normal"
+  },
+  "superheat item": {
+    "name": "Superheat Item",
+    "spellbook": "normal"
+  },
+  "bones to bananas": {
+    "name": "Bones to Bananas",
+    "spellbook": "normal"
+  },
+  "earth wave": {
+    "name": "Earth Wave",
+    "spellbook": "normal",
+    "max_hit": 19
+  },
+  "confuse": {
+    "name": "Confuse",
+    "spellbook": "normal"
+  },
+  "crumble undead": {
+    "name": "Crumble Undead",
+    "spellbook": "normal",
+    "max_hit": 15
+  },
+  "saradomin strike": {
+    "name": "Saradomin Strike",
+    "spellbook": "normal",
+    "max_hit": 20,
+    "required_weapons": ["saradomin staff", "staff of light"]
+  },
+  "telekinetic grab": {
+    "name": "Telekinetic Grab",
+    "spellbook": "normal"
+  },
+  "paddewwa teleport": {
+    "name": "Paddewwa Teleport",
+    "spellbook": "ancient"
+  },
+  "earth bolt": {
+    "name": "Earth Bolt",
+    "spellbook": "normal",
+    "max_hit": 11
+  },
+  "earth strike": {
+    "name": "Earth Strike",
+    "spellbook": "normal",
+    "max_hit": 6
+  },
+  "fire strike": {
+    "name": "Fire Strike",
+    "spellbook": "normal",
+    "max_hit": 8
+  },
+  "lvl-4 enchant": {
+    "name": "Lvl-4 Enchant",
+    "spellbook": "normal"
+  },
+  "flames of zamorak": {
+    "name": "Flames of Zamorak",
+    "spellbook": "normal",
+    "max_hit": 20,
+    "required_weapons": ["zamorak staff", "staff of the dead"]
+  },
+  "trollheim teleport": {
+    "name": "Trollheim Teleport",
+    "spellbook": "normal"
+  },
+  "lvl-6 enchant": {
+    "name": "Lvl-6 Enchant",
+    "spellbook": "normal"
+  },
+  "water blast": {
+    "name": "Water Blast",
+    "spellbook": "normal",
+    "max_hit": 14
+  },
+  "tele block": {
+    "name": "Tele Block",
+    "spellbook": "normal"
+  },
+  "smoke rush": {
+    "name": "Smoke Rush",
+    "spellbook": "ancient",
+    "max_hit": 15
+  },
+  "shadow rush": {
+    "name": "Shadow Rush",
+    "spellbook": "ancient",
+    "max_hit": 16
+  },
+  "wind strike": {
+    "name": "Wind Strike",
+    "spellbook": "normal",
+    "max_hit": 2
+  },
+  "claws of guthix": {
+    "name": "Claws of Guthix",
+    "spellbook": "normal",
+    "max_hit": 20,
+    "required_weapons": ["guthix staff", "void knight mace", "staff of balance"]
+  },
+  "bones to peaches": {
+    "name": "Bones to Peaches",
+    "spellbook": "normal"
+  },
+  "lvl-3 enchant": {
+    "name": "Lvl-3 Enchant",
+    "spellbook": "normal"
+  },
+  "water bolt": {
+    "name": "Water Bolt",
+    "spellbook": "normal",
+    "max_hit": 10
+  },
+  "water wave": {
+    "name": "Water Wave",
+    "spellbook": "normal",
+    "max_hit": 18
+  },
+  "wind bolt": {
+    "name": "Wind Bolt",
+    "spellbook": "normal",
+    "max_hit": 9
+  },
+  "water strike": {
+    "name": "Water Strike",
+    "spellbook": "normal",
+    "max_hit": 4
+  },
+  "lumbridge teleport": {
+    "name": "Lumbridge Teleport",
+    "spellbook": "normal"
+  },
+  "falador teleport": {
+    "name": "Falador Teleport",
+    "spellbook": "normal"
+  },
+  "charge air orb": {
+    "name": "Charge Air Orb",
+    "spellbook": "normal"
+  },
+  "runescape:templates": {
+    "name": "RuneScape:Templates",
+    "spellbook": ""
+  },
+  "varrock teleport": {
+    "name": "Varrock Teleport",
+    "spellbook": "normal"
+  },
+  "wind blast": {
+    "name": "Wind Blast",
+    "spellbook": "normal",
+    "max_hit": 13
+  },
+  "earth blast": {
+    "name": "Earth Blast",
+    "spellbook": "normal",
+    "max_hit": 15
+  },
+  "wind wave": {
+    "name": "Wind Wave",
+    "spellbook": "normal",
+    "max_hit": 17
+  },
+  "magic dart": {
+    "name": "Magic Dart",
+    "spellbook": "normal",
+    "max_hit": 19,
+    "required_weapons": ["slayer's staff", "staff of the dead", "staff of light", "staff of balance"]
+  },
+  "charge": {
+    "name": "Charge",
+    "spellbook": "normal"
+  },
+  "teleport to house": {
+    "name": "Teleport to House",
+    "spellbook": "normal"
+  },
+  "npc contact": {
+    "name": "NPC Contact",
+    "spellbook": "lunar"
+  },
+  "barbarian teleport": {
+    "name": "Barbarian Teleport",
+    "spellbook": "lunar"
+  },
+  "lumbridge home teleport": {
+    "name": "Lumbridge Home Teleport",
+    "spellbook": "normal"
+  },
+  "camelot teleport": {
+    "name": "Camelot Teleport",
+    "spellbook": "normal"
+  },
+  "ardougne teleport": {
+    "name": "Ardougne Teleport",
+    "spellbook": "normal"
+  },
+  "watchtower teleport": {
+    "name": "Watchtower Teleport",
+    "spellbook": "normal"
+  },
+  "ape atoll teleport (standard)": {
+    "name": "Ape Atoll Teleport (standard)",
+    "spellbook": "normal"
+  },
+  "enchant crossbow bolt (red topaz)": {
+    "name": "Enchant Crossbow Bolt (Red Topaz)",
+    "spellbook": "normal"
+  },
+  "lvl-1 enchant": {
+    "name": "Lvl-1 Enchant",
+    "spellbook": "normal"
+  },
+  "blood barrage": {
+    "name": "Blood Barrage",
+    "spellbook": "ancient",
+    "max_hit": 29
+  },
+  "lvl-2 enchant": {
+    "name": "Lvl-2 Enchant",
+    "spellbook": "normal"
+  },
+  "weaken": {
+    "name": "Weaken",
+    "spellbook": "normal"
+  },
+  "curse": {
+    "name": "Curse",
+    "spellbook": "normal"
+  },
+  "bind": {
+    "name": "Bind",
+    "spellbook": "normal"
+  },
+  "snare": {
+    "name": "Snare",
+    "spellbook": "normal"
+  },
+  "vulnerability": {
+    "name": "Vulnerability",
+    "spellbook": "normal"
+  },
+  "enfeeble": {
+    "name": "Enfeeble",
+    "spellbook": "normal"
+  },
+  "entangle": {
+    "name": "Entangle",
+    "spellbook": "normal"
+  },
+  "stun": {
+    "name": "Stun",
+    "spellbook": "normal"
+  },
+  "tele group moonclan": {
+    "name": "Tele Group Moonclan",
+    "spellbook": "lunar"
+  },
+  "moonclan teleport": {
+    "name": "Moonclan Teleport",
+    "spellbook": "lunar"
+  },
+  "spellbook swap": {
+    "name": "Spellbook Swap",
+    "spellbook": "lunar"
+  },
+  "ghorrock teleport": {
+    "name": "Ghorrock Teleport",
+    "spellbook": "ancient"
+  },
+  "humidify": {
+    "name": "Humidify",
+    "spellbook": "lunar"
+  },
+  "superglass make": {
+    "name": "Superglass Make",
+    "spellbook": "lunar"
+  },
+  "waterbirth teleport": {
+    "name": "Waterbirth Teleport",
+    "spellbook": "lunar"
+  },
+  "khazard teleport": {
+    "name": "Khazard Teleport",
+    "spellbook": "lunar"
+  },
+  "fishing guild teleport": {
+    "name": "Fishing Guild Teleport",
+    "spellbook": "lunar"
+  },
+  "catherby teleport": {
+    "name": "Catherby Teleport",
+    "spellbook": "lunar"
+  },
+  "ice plateau teleport": {
+    "name": "Ice Plateau Teleport",
+    "spellbook": "lunar"
+  },
+  "lunar home teleport": {
+    "name": "Lunar Home Teleport",
+    "spellbook": "lunar"
+  },
+  "teleother lumbridge": {
+    "name": "Teleother Lumbridge",
+    "spellbook": "normal"
+  },
+  "string jewellery": {
+    "name": "String Jewellery",
+    "spellbook": "lunar"
+  },
+  "smoke barrage": {
+    "name": "Smoke Barrage",
+    "spellbook": "ancient",
+    "max_hit": 27
+  },
+  "plank make": {
+    "name": "Plank Make",
+    "spellbook": "lunar"
+  },
+  "kharyrll teleport": {
+    "name": "Kharyrll Teleport",
+    "spellbook": "ancient"
+  },
+  "blood burst": {
+    "name": "Blood Burst",
+    "spellbook": "ancient",
+    "max_hit": 21
+  },
+  "hunter kit (spell)": {
+    "name": "Hunter Kit (spell)",
+    "spellbook": "lunar"
+  },
+  "vengeance": {
+    "name": "Vengeance",
+    "spellbook": "lunar"
+  },
+  "blood rush": {
+    "name": "Blood Rush",
+    "spellbook": "ancient",
+    "max_hit": 17
+  },
+  "monster examine": {
+    "name": "Monster Examine",
+    "spellbook": "lunar"
+  },
+  "ape atoll teleport (arceuus)": {
+    "name": "Ape Atoll Teleport (Arceuus)",
+    "spellbook": "arceuus"
+  },
+  "lvl-5 enchant": {
+    "name": "Lvl-5 Enchant",
+    "spellbook": "normal"
+  },
+  "vengeance other": {
+    "name": "Vengeance Other",
+    "spellbook": "lunar"
+  },
+  "tele group waterbirth": {
+    "name": "Tele Group Waterbirth",
+    "spellbook": "lunar"
+  },
+  "tele group barbarian": {
+    "name": "Tele Group Barbarian",
+    "spellbook": "lunar"
+  },
+  "tele group khazard": {
+    "name": "Tele Group Khazard",
+    "spellbook": "lunar"
+  },
+  "smoke burst": {
+    "name": "Smoke Burst",
+    "spellbook": "ancient",
+    "max_hit": 17
+  },
+  "shadow barrage": {
+    "name": "Shadow Barrage",
+    "spellbook": "ancient",
+    "max_hit": 28
+  },
+  "enchant crossbow bolt (onyx)": {
+    "name": "Enchant Crossbow Bolt (Onyx)",
+    "spellbook": "normal"
+  },
+  "enchant crossbow bolt (dragonstone)": {
+    "name": "Enchant Crossbow Bolt (Dragonstone)",
+    "spellbook": "normal"
+  },
+  "enchant crossbow bolt (diamond)": {
+    "name": "Enchant Crossbow Bolt (Diamond)",
+    "spellbook": "normal"
+  },
+  "enchant crossbow bolt (ruby)": {
+    "name": "Enchant Crossbow Bolt (Ruby)",
+    "spellbook": "normal"
+  },
+  "enchant crossbow bolt (emerald)": {
+    "name": "Enchant Crossbow Bolt (Emerald)",
+    "spellbook": "normal"
+  },
+  "enchant crossbow bolt (pearl)": {
+    "name": "Enchant Crossbow Bolt (Pearl)",
+    "spellbook": "normal"
+  },
+  "enchant crossbow bolt (jade)": {
+    "name": "Enchant Crossbow Bolt (Jade)",
+    "spellbook": "normal"
+  },
+  "enchant crossbow bolt (sapphire)": {
+    "name": "Enchant Crossbow Bolt (Sapphire)",
+    "spellbook": "normal"
+  },
+  "enchant crossbow bolt (opal)": {
+    "name": "Enchant Crossbow Bolt (Opal)",
+    "spellbook": "normal"
+  },
+  "charge fire orb": {
+    "name": "Charge Fire Orb",
+    "spellbook": "normal"
+  },
+  "charge earth orb": {
+    "name": "Charge Earth Orb",
+    "spellbook": "normal"
+  },
+  "charge water orb": {
+    "name": "Charge Water Orb",
+    "spellbook": "normal"
+  },
+  "tele group fishing guild": {
+    "name": "Tele Group Fishing Guild",
+    "spellbook": "lunar"
+  },
+  "teleother falador": {
+    "name": "Teleother Falador",
+    "spellbook": "normal"
+  },
+  "teleother camelot": {
+    "name": "Teleother Camelot",
+    "spellbook": "normal"
+  },
+  "edgeville home teleport": {
+    "name": "Edgeville Home Teleport",
+    "spellbook": "ancient"
+  },
+  "senntisten teleport": {
+    "name": "Senntisten Teleport",
+    "spellbook": "ancient"
+  },
+  "lassar teleport": {
+    "name": "Lassar Teleport",
+    "spellbook": "ancient"
+  },
+  "tele group catherby": {
+    "name": "Tele Group Catherby",
+    "spellbook": "lunar"
+  },
+  "dareeyak teleport": {
+    "name": "Dareeyak Teleport",
+    "spellbook": "ancient"
+  },
+  "blood blitz": {
+    "name": "Blood Blitz",
+    "spellbook": "ancient",
+    "max_hit": 25
+  },
+  "shadow burst": {
+    "name": "Shadow Burst",
+    "spellbook": "ancient",
+    "max_hit": 18
+  },
+  "shadow blitz": {
+    "name": "Shadow Blitz",
+    "spellbook": "ancient",
+    "max_hit": 24
+  },
+  "smoke blitz": {
+    "name": "Smoke Blitz",
+    "spellbook": "ancient",
+    "max_hit": 23
+  },
+  "carrallanger teleport": {
+    "name": "Carrallanger Teleport",
+    "spellbook": "ancient"
+  },
+  "annakarl teleport": {
+    "name": "Annakarl Teleport",
+    "spellbook": "ancient"
+  },
+  "tele group ice plateau": {
+    "name": "Tele Group Ice Plateau",
+    "spellbook": "lunar"
+  },
+  "dream": {
+    "name": "Dream",
+    "spellbook": "lunar"
+  },
+  "stat spy": {
+    "name": "Stat Spy",
+    "spellbook": "lunar"
+  },
+  "fertile soil": {
+    "name": "Fertile Soil",
+    "spellbook": "lunar"
+  },
+  "energy transfer": {
+    "name": "Energy Transfer",
+    "spellbook": "lunar"
+  },
+  "cure other": {
+    "name": "Cure Other",
+    "spellbook": "lunar"
+  },
+  "magic imbue": {
+    "name": "Magic Imbue",
+    "spellbook": "lunar"
+  },
+  "bake pie": {
+    "name": "Bake Pie",
+    "spellbook": "lunar"
+  },
+  "cure plant": {
+    "name": "Cure Plant",
+    "spellbook": "lunar"
+  },
+  "cure me": {
+    "name": "Cure Me",
+    "spellbook": "lunar"
+  },
+  "cure group": {
+    "name": "Cure Group",
+    "spellbook": "lunar"
+  },
+  "heal other": {
+    "name": "Heal Other",
+    "spellbook": "lunar"
+  },
+  "heal group": {
+    "name": "Heal Group",
+    "spellbook": "lunar"
+  },
+  "stat restore pot share": {
+    "name": "Stat Restore Pot Share",
+    "spellbook": "lunar"
+  },
+  "boost potion share": {
+    "name": "Boost Potion Share",
+    "spellbook": "lunar"
+  },
+  "teleport to target": {
+    "name": "Teleport to Target",
+    "spellbook": "all"
+  },
+  "tan leather": {
+    "name": "Tan Leather",
+    "spellbook": "lunar"
+  },
+  "recharge dragonstone": {
+    "name": "Recharge Dragonstone",
+    "spellbook": "lunar"
+  },
+  "geomancy": {
+    "name": "Geomancy",
+    "spellbook": "lunar"
+  },
+  "kourend castle teleport": {
+    "name": "Kourend Castle Teleport",
+    "spellbook": "normal"
+  },
+  "arceuus home teleport": {
+    "name": "Arceuus Home Teleport",
+    "spellbook": "arceuus"
+  },
+  "reanimate tzhaar": {
+    "name": "Reanimate TzHaar",
+    "spellbook": "arceuus"
+  },
+  "reanimate bloodveld": {
+    "name": "Reanimate Bloodveld",
+    "spellbook": "arceuus"
+  },
+  "reanimate goblin": {
+    "name": "Reanimate Goblin",
+    "spellbook": "arceuus"
+  },
+  "reanimate monkey": {
+    "name": "Reanimate Monkey",
+    "spellbook": "arceuus"
+  },
+  "reanimate imp": {
+    "name": "Reanimate Imp",
+    "spellbook": "arceuus"
+  },
+  "reanimate dragon": {
+    "name": "Reanimate Dragon",
+    "spellbook": "arceuus"
+  },
+  "reanimate minotaur": {
+    "name": "Reanimate Minotaur",
+    "spellbook": "arceuus"
+  },
+  "reanimate scorpion": {
+    "name": "Reanimate Scorpion",
+    "spellbook": "arceuus"
+  },
+  "reanimate bear": {
+    "name": "Reanimate Bear",
+    "spellbook": "arceuus"
+  },
+  "reanimate unicorn": {
+    "name": "Reanimate Unicorn",
+    "spellbook": "arceuus"
+  },
+  "reanimate dog": {
+    "name": "Reanimate Dog",
+    "spellbook": "arceuus"
+  },
+  "reanimate chaos druid": {
+    "name": "Reanimate Chaos Druid",
+    "spellbook": "arceuus"
+  },
+  "reanimate giant": {
+    "name": "Reanimate Giant",
+    "spellbook": "arceuus"
+  },
+  "reanimate ogre": {
+    "name": "Reanimate Ogre",
+    "spellbook": "arceuus"
+  },
+  "reanimate elf": {
+    "name": "Reanimate Elf",
+    "spellbook": "arceuus"
+  },
+  "reanimate troll": {
+    "name": "Reanimate Troll",
+    "spellbook": "arceuus"
+  },
+  "reanimate horror": {
+    "name": "Reanimate Horror",
+    "spellbook": "arceuus"
+  },
+  "reanimate kalphite": {
+    "name": "Reanimate Kalphite",
+    "spellbook": "arceuus"
+  },
+  "reanimate dagannoth": {
+    "name": "Reanimate Dagannoth",
+    "spellbook": "arceuus"
+  },
+  "reanimate demon": {
+    "name": "Reanimate Demon",
+    "spellbook": "arceuus"
+  },
+  "reanimate aviansie": {
+    "name": "Reanimate Aviansie",
+    "spellbook": "arceuus"
+  },
+  "reanimate abyssal creature": {
+    "name": "Reanimate Abyssal Creature",
+    "spellbook": "arceuus"
+  },
+  "lumbridge graveyard teleport": {
+    "name": "Lumbridge Graveyard Teleport",
+    "spellbook": "arceuus"
+  },
+  "draynor manor teleport": {
+    "name": "Draynor Manor Teleport",
+    "spellbook": "arceuus"
+  },
+  "mind altar teleport": {
+    "name": "Mind Altar Teleport",
+    "spellbook": "arceuus"
+  },
+  "respawn teleport": {
+    "name": "Respawn Teleport",
+    "spellbook": "arceuus"
+  },
+  "salve graveyard teleport": {
+    "name": "Salve Graveyard Teleport",
+    "spellbook": "arceuus"
+  },
+  "fenkenstrain's castle teleport": {
+    "name": "Fenkenstrain's Castle Teleport",
+    "spellbook": "arceuus"
+  },
+  "west ardougne teleport": {
+    "name": "West Ardougne Teleport",
+    "spellbook": "arceuus"
+  },
+  "harmony island teleport": {
+    "name": "Harmony Island Teleport",
+    "spellbook": "arceuus"
+  },
+  "cemetery teleport": {
+    "name": "Cemetery Teleport",
+    "spellbook": "arceuus"
+  },
+  "barrows teleport": {
+    "name": "Barrows Teleport",
+    "spellbook": "arceuus"
+  },
+  "resurrect crops": {
+    "name": "Resurrect Crops",
+    "spellbook": "arceuus"
+  },
+  "lvl-7 enchant": {
+    "name": "Lvl-7 Enchant",
+    "spellbook": "normal"
+  },
+  "spin flax": {
+    "name": "Spin Flax",
+    "spellbook": "lunar"
+  },
+  "ourania teleport": {
+    "name": "Ourania Teleport",
+    "spellbook": "lunar"
+  },
+  "wind surge": {
+    "name": "Wind Surge",
+    "spellbook": "normal",
+    "max_hit": 21
+  },
+  "water surge": {
+    "name": "Water Surge",
+    "spellbook": "normal",
+    "max_hit": 22
+  },
+  "earth surge": {
+    "name": "Earth Surge",
+    "spellbook": "normal",
+    "max_hit": 23
+  },
+  "fire surge": {
+    "name": "Fire Surge",
+    "spellbook": "normal",
+    "max_hit": 24
+  },
+  "battlefront teleport": {
+    "name": "Battlefront Teleport",
+    "spellbook": "arceuus"
+  },
+  "lesser corruption": {
+    "name": "Lesser Corruption",
+    "spellbook": "arceuus"
+  },
+  "greater corruption": {
+    "name": "Greater Corruption",
+    "spellbook": "arceuus"
+  },
+  "ghostly grasp": {
+    "name": "Ghostly Grasp",
+    "spellbook": "arceuus"
+  },
+  "skeletal grasp": {
+    "name": "Skeletal Grasp",
+    "spellbook": "arceuus"
+  },
+  "undead grasp": {
+    "name": "Undead Grasp",
+    "spellbook": "arceuus"
+  },
+  "inferior demonbane": {
+    "name": "Inferior Demonbane",
+    "spellbook": "arceuus"
+  },
+  "superior demonbane": {
+    "name": "Superior Demonbane",
+    "spellbook": "arceuus"
+  },
+  "dark demonbane": {
+    "name": "Dark Demonbane",
+    "spellbook": "arceuus"
+  },
+  "demonic offering": {
+    "name": "Demonic Offering",
+    "spellbook": "arceuus"
+  },
+  "sinister offering": {
+    "name": "Sinister Offering",
+    "spellbook": "arceuus"
+  },
+  "degrime": {
+    "name": "Degrime",
+    "spellbook": "arceuus"
+  },
+  "dark lure": {
+    "name": "Dark Lure",
+    "spellbook": "arceuus"
+  },
+  "death charge": {
+    "name": "Death Charge",
+    "spellbook": "arceuus"
+  },
+  "mark of darkness": {
+    "name": "Mark of Darkness",
+    "spellbook": "arceuus"
+  },
+  "ward of arceuus": {
+    "name": "Ward of Arceuus",
+    "spellbook": "arceuus"
+  },
+  "shadow veil": {
+    "name": "Shadow Veil",
+    "spellbook": "arceuus"
+  },
+  "vile vigour": {
+    "name": "Vile Vigour",
+    "spellbook": "arceuus"
+  },
+  "arceuus library teleport": {
+    "name": "Arceuus Library Teleport",
+    "spellbook": "arceuus"
+  },
+  "basic reanimation": {
+    "name": "Basic Reanimation",
+    "spellbook": "arceuus"
+  },
+  "adept reanimation": {
+    "name": "Adept Reanimation",
+    "spellbook": "arceuus"
+  },
+  "expert reanimation": {
+    "name": "Expert Reanimation",
+    "spellbook": "arceuus"
+  },
+  "master reanimation": {
+    "name": "Master Reanimation",
+    "spellbook": "arceuus"
+  },
+  "resurrect lesser ghost": {
+    "name": "Resurrect Lesser Ghost",
+    "spellbook": "arceuus"
+  },
+  "resurrect lesser skeleton": {
+    "name": "Resurrect Lesser Skeleton",
+    "spellbook": "arceuus"
+  },
+  "resurrect lesser zombie": {
+    "name": "Resurrect Lesser Zombie",
+    "spellbook": "arceuus"
+  },
+  "resurrect superior ghost": {
+    "name": "Resurrect Superior Ghost",
+    "spellbook": "arceuus"
+  },
+  "resurrect superior skeleton": {
+    "name": "Resurrect Superior Skeleton",
+    "spellbook": "arceuus"
+  },
+  "resurrect superior zombie": {
+    "name": "Resurrect Superior Zombie",
+    "spellbook": "arceuus"
+  },
+  "resurrect greater ghost": {
+    "name": "Resurrect Greater Ghost",
+    "spellbook": "arceuus"
+  },
+  "resurrect greater skeleton": {
+    "name": "Resurrect Greater Skeleton",
+    "spellbook": "arceuus"
+  },
+  "resurrect greater zombie": {
+    "name": "Resurrect Greater Zombie",
+    "spellbook": "arceuus"
+  },
+  "resurrect ghost (beta)": {
+    "name": "Resurrect Ghost (beta)",
+    "spellbook": "arceuus"
+  },
+  "resurrect skeleton (beta)": {
+    "name": "Resurrect Skeleton (beta)",
+    "spellbook": "arceuus"
+  },
+  "resurrect zombie (beta)": {
+    "name": "Resurrect Zombie (beta)",
+    "spellbook": "arceuus"
+  },
+  "civitas illa fortis teleport": {
+    "name": "Civitas illa Fortis Teleport",
+    "spellbook": "normal"
+  },
+  "monster inspect": {
+    "name": "Monster Inspect",
+    "spellbook": "normal"
+  },
+  "teleport to boat": {
+    "name": "Teleport to Boat",
+    "spellbook": "normal"
+  },
+  "summon boat": {
+    "name": "Summon Boat",
+    "spellbook": "normal"
+  },
+  "iban's blast": {
+    "name": "Iban's Blast",
+    "spellbook": "normal",
+    "max_hit": 25,
+    "required_weapons": ["iban's staff"]
+  }
+}

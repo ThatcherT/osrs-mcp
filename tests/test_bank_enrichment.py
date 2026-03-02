@@ -5,7 +5,7 @@ from unittest.mock import patch, AsyncMock
 from osrs_mcp.tools.player import _enrich_bank_item
 from osrs_mcp.tools.dps import (
     _analyze_weakness, _pick_prayer, _pick_potion, _weakness_to_style,
-    _detect_combat_style,
+    _detect_combat_style, _weapon_can_cast,
 )
 from osrs_mcp.dps.types import Monster
 
@@ -322,3 +322,49 @@ class TestKphCalculation:
         overhead = 0
         kph = round(3600 / (ttk + overhead), 1)
         assert kph == 30.0
+
+
+class TestWeaponCanCast:
+    """Test spell-weapon compatibility checking."""
+
+    def test_no_requirements(self):
+        """Standard spells can be cast with any weapon."""
+        spell = {"name": "Fire Surge", "max_hit": 24, "element": "Fire"}
+        assert _weapon_can_cast("Ancient staff", spell) is True
+        assert _weapon_can_cast("Staff of air", spell) is True
+
+    def test_ibans_blast_requires_ibans_staff(self):
+        spell = {"name": "Iban's Blast", "max_hit": 25, "required_weapons": ["iban's staff"]}
+        assert _weapon_can_cast("Iban's staff", spell) is True
+        assert _weapon_can_cast("Iban's staff (u)", spell) is True
+        assert _weapon_can_cast("Ancient staff", spell) is False
+        assert _weapon_can_cast("Staff of air", spell) is False
+
+    def test_god_spell_zamorak(self):
+        spell = {"name": "Flames of Zamorak", "max_hit": 20,
+                 "required_weapons": ["zamorak staff", "staff of the dead"]}
+        assert _weapon_can_cast("Zamorak staff", spell) is True
+        assert _weapon_can_cast("Staff of the dead", spell) is True
+        assert _weapon_can_cast("Toxic staff of the dead", spell) is True
+        assert _weapon_can_cast("Saradomin staff", spell) is False
+
+    def test_god_spell_saradomin(self):
+        spell = {"name": "Saradomin Strike", "max_hit": 20,
+                 "required_weapons": ["saradomin staff", "staff of light"]}
+        assert _weapon_can_cast("Saradomin staff", spell) is True
+        assert _weapon_can_cast("Staff of light", spell) is True
+        assert _weapon_can_cast("Guthix staff", spell) is False
+
+    def test_magic_dart(self):
+        spell = {"name": "Magic Dart", "max_hit": 19,
+                 "required_weapons": ["slayer's staff", "staff of the dead",
+                                      "staff of light", "staff of balance"]}
+        assert _weapon_can_cast("Slayer's staff", spell) is True
+        assert _weapon_can_cast("Slayer's staff (e)", spell) is True
+        assert _weapon_can_cast("Staff of the dead", spell) is True
+        assert _weapon_can_cast("Ancient staff", spell) is False
+
+    def test_case_insensitive(self):
+        spell = {"name": "Iban's Blast", "max_hit": 25, "required_weapons": ["iban's staff"]}
+        assert _weapon_can_cast("IBAN'S STAFF", spell) is True
+        assert _weapon_can_cast("iban's staff (u)", spell) is True

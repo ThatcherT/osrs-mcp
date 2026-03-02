@@ -120,12 +120,15 @@ def find_spell(name: str) -> dict | None:
     spell_name = spell.get("name", "")
     element = _infer_element(spell_name)
 
-    return {
+    result = {
         "name": spell_name,
         "max_hit": spell["max_hit"],
         "element": element,
         "spellbook": spell.get("spellbook", ""),
     }
+    if spell.get("required_weapons"):
+        result["required_weapons"] = spell["required_weapons"]
+    return result
 
 
 _ELEMENT_PREFIXES = {

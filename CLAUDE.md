@@ -63,6 +63,7 @@ The user has 3 accounts: `die tmo`, `31k elite`, `thatcher98`. If they say "my i
 - Always use the player's actual stats, not maxed defaults
 
 ## Important Game Mechanics
+- **Spell weapon requirements**: Some spells require a specific weapon equipped. Iban's Blast needs Iban's staff, god spells need their god staff (or Staff of the dead for Zamorak), Magic Dart needs Slayer's staff or SotD. The DPS tools enforce this — `calc_dps` returns an error and `boss_setup` skips incompatible combos.
 - **Elemental weakness**: Only affects standard spellbook elemental spells (Strike/Bolt/Blast/Wave/Surge). Does NOT affect powered staves (Trident, Tumeken's Shadow), Ice Barrage, or non-elemental spells. Does NOT affect melee or ranged.
 - **Dragon Hunter Lance/Crossbow**: Bonus damage/accuracy vs dragons. Separate from elemental weakness.
 - **Slayer helm**: 16.67% melee boost (or 15% ranged/mage with imbue) on task only.

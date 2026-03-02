@@ -231,3 +231,16 @@ class TestDataLoaders:
         spells = load_spells()
         if spells:  # Only if data files exist
             assert "fire surge" in spells or "Fire Surge" in spells
+
+    def test_find_spell_returns_required_weapons(self):
+        from osrs_mcp.util.data import find_spell
+        result = find_spell("Iban's Blast")
+        assert result is not None
+        assert "required_weapons" in result
+        assert "iban's staff" in result["required_weapons"]
+
+    def test_find_spell_no_required_weapons_for_standard(self):
+        from osrs_mcp.util.data import find_spell
+        result = find_spell("Fire Surge")
+        assert result is not None
+        assert "required_weapons" not in result

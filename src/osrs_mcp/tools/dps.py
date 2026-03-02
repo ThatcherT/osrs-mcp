@@ -124,6 +124,19 @@ def _resolve_gear(gear_names: list[str]) -> list[dict]:
     return items
 
 
+def _weapon_can_cast(weapon_name: str, spell_data: dict) -> bool:
+    """Check if a weapon can cast a spell that has weapon requirements.
+
+    Some spells (Iban's Blast, god spells, Magic Dart) require specific weapons.
+    Returns True if the spell has no requirements or the weapon matches.
+    """
+    required = spell_data.get("required_weapons")
+    if not required:
+        return True  # Standard spells can be cast with any staff
+    weapon_lower = weapon_name.lower()
+    return any(req in weapon_lower for req in required)
+
+
 @mcp.tool()
 async def calc_dps(
     monster: str,
@@ -174,6 +187,14 @@ async def calc_dps(
                 spell_max_hit = spell_data["max_hit"]
             if not spell_element:
                 spell_element = spell_data["element"]
+            # Validate weapon can cast this spell
+            if not _weapon_can_cast(weapon, spell_data):
+                required = spell_data.get("required_weapons", [])
+                return {
+                    "error": f"{spell_data['name']} requires one of: {', '.join(required)}. "
+                             f"Cannot be cast with {weapon}.",
+                    "required_weapons": required,
+                }
 
     # Build gear setup from weapon + other gear
     gear_names = [weapon]
@@ -620,6 +641,7 @@ async def boss_setup(
     # Resolve spell for magic
     spell_max_hit = 0
     spell_element = ""
+    spell_data = None
     if spell:
         spell_data = find_spell(spell)
         if spell_data:
@@ -659,6 +681,12 @@ async def boss_setup(
         if w_style != style:
             continue
 
+        weapon_name = weapon_item.get("name", "")
+
+        # Skip magic weapons that can't cast the specified spell
+        if w_style == "magic" and spell_data and not _weapon_can_cast(weapon_name, spell_data):
+            continue
+
         is_2h = weapon_item.get("slot") == "2h"
 
         # Build gear: weapon + best armor for this style
@@ -666,7 +694,6 @@ async def boss_setup(
 
         # Build the full equipment list for _parse_gear
         gear_dicts = [bonuses]
-        weapon_name = weapon_item.get("name", "")
         speed = bonuses.get("speed")
         if speed is None:
             equip_data = find_equipment_by_name(weapon_name)
