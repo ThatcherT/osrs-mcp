@@ -269,16 +269,22 @@ def _detect_combat_style(weapon: dict) -> tuple[str, str]:
     """Determine combat style and attack type from a weapon's bonuses.
 
     Returns (style, attack_type) where:
-      style: "melee" or "ranged"  (magic skipped per plan)
-      attack_type: "stab", "slash", "crush" for melee; "ranged" for ranged
+      style: "melee", "ranged", or "magic"
+      attack_type: "stab", "slash", "crush" for melee; "ranged"/"magic" for ranged/magic
     """
     arange = int(weapon.get("arange") or 0)
+    amagic = int(weapon.get("amagic") or 0)
     astab = int(weapon.get("astab") or 0)
     aslash = int(weapon.get("aslash") or 0)
     acrush = int(weapon.get("acrush") or 0)
 
-    # If ranged attack bonus is the highest positive bonus → ranged
     melee_best = max(astab, aslash, acrush)
+
+    # Magic: highest positive bonus
+    if amagic > 0 and amagic >= melee_best and amagic >= arange:
+        return ("magic", "magic")
+
+    # Ranged: highest positive bonus
     if arange > 0 and arange >= melee_best:
         return ("ranged", "ranged")
 
@@ -304,10 +310,13 @@ def _best_armor_for_style(
 
     For melee: maximize 'str' (melee strength).
     For ranged: maximize 'rstr' (ranged strength).
+    For magic: maximize 'mdmg' (magic damage %).
     Returns list of equipment dicts (with bonuses).
     """
     if style == "ranged":
         stat = "rstr"
+    elif style == "magic":
+        stat = "mdmg"
     else:
         stat = "str"
 
@@ -341,7 +350,71 @@ def _detect_special_equipment(
         return "dragon_hunter_lance"
     if "dragon hunter crossbow" in name_lower and monster.attribute == "dragon":
         return "dragon_hunter_crossbow"
+    if "arclight" in name_lower and monster.attribute == "demon":
+        return "arclight"
+    if "keris partisan" in name_lower and monster.attribute == "kalphite":
+        return "keris_partisan"
     return None
+
+
+def _analyze_weakness(monster: Monster) -> dict:
+    """Analyze monster defence bonuses to find weakest style."""
+    defences = {
+        "stab": monster.dstab, "slash": monster.dslash, "crush": monster.dcrush,
+        "ranged": monster.drange, "magic": monster.dmagic,
+    }
+    weakest = min(defences, key=defences.get)
+    return {
+        "defences": defences,
+        "weakest_style": weakest,
+        "elemental_weakness": monster.elemental_weakness or None,
+        "elemental_weakness_percent": monster.elemental_weakness_percent,
+    }
+
+
+def _pick_prayer(style: str, prayer_level: int) -> str:
+    """Pick the best available prayer for a style given the player's prayer level."""
+    if style == "melee":
+        if prayer_level >= 70:
+            return "piety"
+        if prayer_level >= 60:
+            return "chivalry"
+        if prayer_level >= 31:
+            return "ultimate_strength"
+        if prayer_level >= 13:
+            return "superhuman_strength"
+        if prayer_level >= 4:
+            return "burst_of_strength"
+        return "none"
+    if style == "ranged":
+        if prayer_level >= 74:
+            return "rigour"
+        if prayer_level >= 44:
+            return "eagle_eye"
+        if prayer_level >= 26:
+            return "hawk_eye"
+        if prayer_level >= 8:
+            return "sharp_eye"
+        return "none"
+    # magic
+    if prayer_level >= 77:
+        return "augury"
+    if prayer_level >= 45:
+        return "mystic_might"
+    if prayer_level >= 27:
+        return "mystic_lore"
+    if prayer_level >= 9:
+        return "mystic_will"
+    return "none"
+
+
+def _pick_potion(style: str) -> str:
+    """Pick default potion for a style."""
+    if style == "melee":
+        return "super_combat"
+    if style == "ranged":
+        return "super_ranging"
+    return "saturated_heart"
 
 
 @mcp.tool()
@@ -491,3 +564,203 @@ async def suggest_loadout(
                 "Ranged uses rapid + Rigour + super ranging. "
                 "Magic weapons are excluded (spell choice needed).",
     }
+
+
+@mcp.tool()
+async def boss_setup(
+    boss: str,
+    username: str = "",
+    style: str = "",
+    spell: str = "",
+    on_slayer_task: bool = False,
+    per_kill_overhead: int = 30,
+) -> dict:
+    """Suggest the best setup for a boss, with magic support, weakness analysis, and KPH.
+
+    Improves on suggest_loadout by adding magic weapon support, kills-per-hour
+    estimates, monster weakness analysis, and prayer selection based on your
+    actual prayer level.
+
+    Args:
+        boss: Boss/monster name (e.g. "Vorkath", "Sarachnis").
+        username: RuneScape username. Leave empty to use configured default.
+        style: Combat style filter - "melee", "ranged", "magic", or "" for auto
+            (auto picks the style the boss is weakest to).
+        spell: Spell name for magic (e.g. "Fire Surge", "Iban's Blast"). If style
+            is magic or auto-detected, this spell is used for all magic weapons.
+        on_slayer_task: Whether you are on a slayer task for this monster.
+        per_kill_overhead: Seconds of overhead per kill for banking/eating/travel.
+            Used to calculate kills per hour. Default 30.
+    """
+    # Resolve username
+    if not username:
+        cfg = get_config()
+        username = cfg.username or ""
+    if not username:
+        raise ValueError("No username provided and none configured.")
+
+    # Fetch monster, stats, bank
+    mon = await _resolve_monster(boss)
+    stats = await _get_player_stats(username)
+    bank = await get_bank(username)
+    if bank is None:
+        return {"error": f"No bank data found for '{username}'."}
+
+    # Analyze weakness
+    weakness = _analyze_weakness(mon)
+
+    # Auto-pick style based on monster's weakest defence
+    if not style:
+        style = _weakness_to_style(weakness["weakest_style"])
+
+    # Pick prayer + potion based on player's actual prayer level
+    prayer = _pick_prayer(style, stats.prayer)
+    potion = _pick_potion(style)
+
+    # Resolve spell for magic
+    spell_max_hit = 0
+    spell_element = ""
+    if spell:
+        spell_data = find_spell(spell)
+        if spell_data:
+            spell_max_hit = spell_data["max_hit"]
+            spell_element = spell_data["element"]
+
+    # Enrich bank
+    from osrs_mcp.tools.player import _enrich_bank_item
+    equipment = load_equipment()
+    enriched = [_enrich_bank_item(item, equipment) for item in bank]
+
+    # Organize by slot
+    by_slot: dict[str, list[dict]] = defaultdict(list)
+    for item in enriched:
+        slot = item.get("slot")
+        if slot and isinstance(item.get("bonuses"), dict):
+            by_slot[slot].append(item)
+
+    # Collect weapons
+    weapons = by_slot.get("weapon", []) + by_slot.get("2h", [])
+    if not weapons:
+        return {"error": "No weapons found in bank."}
+
+    # Stance selection
+    stance_map = {"melee": "aggressive", "ranged": "rapid", "magic": "accurate"}
+    stance = stance_map.get(style, "accurate")
+
+    results = []
+    for weapon_item in weapons:
+        bonuses = weapon_item.get("bonuses", {})
+        if not isinstance(bonuses, dict):
+            continue
+
+        w_style, attack_type = _detect_combat_style(bonuses)
+
+        # Filter by requested style
+        if w_style != style:
+            continue
+
+        is_2h = weapon_item.get("slot") == "2h"
+
+        # Build gear: weapon + best armor for this style
+        armor_items = _best_armor_for_style(by_slot, w_style, is_2h)
+
+        # Build the full equipment list for _parse_gear
+        gear_dicts = [bonuses]
+        weapon_name = weapon_item.get("name", "")
+        speed = bonuses.get("speed")
+        if speed is None:
+            equip_data = find_equipment_by_name(weapon_name)
+            if equip_data:
+                speed = equip_data.get("speed")
+        if speed is not None:
+            gear_dicts[0] = dict(bonuses, speed=speed)
+
+        for armor in armor_items:
+            armor_bonuses = armor.get("bonuses", {})
+            if isinstance(armor_bonuses, dict):
+                gear_dicts.append(armor_bonuses)
+
+        gear_setup = _parse_gear(gear_dicts)
+
+        # Auto-detect special equipment
+        special = _detect_special_equipment(weapon_name, mon)
+
+        # Calculate DPS
+        try:
+            if w_style == "magic":
+                smh = spell_max_hit or 24
+                result = calculate_magic_dps(
+                    stats, gear_setup, mon,
+                    spell_max_hit=smh,
+                    spell_element=spell_element,
+                    prayer=prayer, potion=potion,
+                    on_slayer_task=on_slayer_task,
+                    special_equipment=special,
+                )
+            elif w_style == "ranged":
+                result = calculate_ranged_dps(
+                    stats, gear_setup, mon,
+                    stance=stance, prayer=prayer, potion=potion,
+                    on_slayer_task=on_slayer_task,
+                    special_equipment=special,
+                )
+            else:
+                result = calculate_melee_dps(
+                    stats, gear_setup, mon,
+                    attack_type=attack_type, stance=stance,
+                    prayer=prayer, potion=potion,
+                    on_slayer_task=on_slayer_task,
+                    special_equipment=special,
+                )
+        except Exception:
+            continue
+
+        # Calculate KPH
+        ttk = result.ttk_seconds
+        if ttk > 0 and ttk != float("inf"):
+            kph = round(3600 / (ttk + per_kill_overhead), 1)
+        else:
+            kph = 0
+
+        gear_names = [a.get("name", "?") for a in armor_items]
+        weapon_label = weapon_name
+        if w_style == "magic" and spell:
+            weapon_label = f"{weapon_name} ({spell})"
+
+        results.append({
+            "weapon": weapon_label,
+            "style": w_style,
+            "attack_type": attack_type,
+            "dps": result.dps,
+            "accuracy": result.accuracy,
+            "max_hit": result.max_hit,
+            "ttk_seconds": result.ttk_seconds,
+            "kph": kph,
+            "attack_speed": result.attack_speed,
+            "armor": gear_names,
+            "special_equipment": special,
+            "prayer": prayer,
+            "potion": potion,
+        })
+
+    results.sort(key=lambda r: r["dps"], reverse=True)
+    top = results[:5]
+
+    return {
+        "monster": mon.name or boss,
+        "monster_hp": mon.hitpoints,
+        "weakness": weakness,
+        "username": username,
+        "style": style,
+        "top_setups": top,
+        "total_weapons_tested": len(results),
+    }
+
+
+def _weakness_to_style(weakest_defence: str) -> str:
+    """Map a monster's weakest defence bonus name to a combat style."""
+    if weakest_defence in ("stab", "slash", "crush"):
+        return "melee"
+    if weakest_defence == "ranged":
+        return "ranged"
+    return "magic"
