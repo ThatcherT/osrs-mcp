@@ -2,10 +2,10 @@
 
 
 class TestServerRegistration:
-    def test_all_22_tools_registered(self):
+    def test_all_24_tools_registered(self):
         from osrs_mcp.server import mcp
         tools = mcp._tool_manager._tools
-        assert len(tools) == 22
+        assert len(tools) == 24
 
     def test_expected_tool_names(self):
         from osrs_mcp.server import mcp
@@ -17,8 +17,9 @@ class TestServerRegistration:
             "calc_dps", "compare_weapons", "suggest_loadout", "boss_setup",
             "quest_info",
             "search_wiki", "money_making_methods", "boss_requirements",
-            "read_wiki_page",
+            "read_wiki_page", "resource_sources",
             "skilling_hours", "boss_grind_hours",
+            "slayer_unlocks",
         }
         assert tool_names == expected
 

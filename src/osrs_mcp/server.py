@@ -10,6 +10,7 @@ import osrs_mcp.tools.dps  # noqa: F401, E402
 import osrs_mcp.tools.quests  # noqa: F401, E402
 import osrs_mcp.tools.general  # noqa: F401, E402
 import osrs_mcp.tools.hours  # noqa: F401, E402
+import osrs_mcp.tools.slayer  # noqa: F401, E402
 
 
 def main():

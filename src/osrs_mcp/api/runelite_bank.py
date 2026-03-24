@@ -3,6 +3,11 @@
 RuneLite's Quest Helper plugin stores bank contents in the rsprofile
 properties file as itemId,quantity pairs. This module reads that data
 and resolves item IDs to names using the prices API mapping.
+
+Supports multiple RuneLite data locations:
+- Standalone RuneLite (AppImage): ~/.runelite/
+- Jagex Launcher (flatpak): ~/.var/app/com.jagexlauncher.JagexLauncher/data/user_home/.runelite/
+- Jagex Launcher (older flatpak): ~/.var/app/com.jagex.Launcher/.runelite/
 """
 import re
 from pathlib import Path
@@ -15,17 +20,24 @@ from osrs_mcp.cache import cache
 # Pre-generated comprehensive item name map (includes untradeables)
 _ITEM_NAMES_FILE = Path(__file__).parent.parent.parent.parent / "data" / "item_names.json"
 
-# RuneLite stores profiles in ~/.runelite/profiles2/
-RUNELITE_DIR = Path.home() / ".runelite" / "profiles2"
+# All known RuneLite profile directories — standalone + Jagex launcher variants
+_RUNELITE_DIRS = [
+    Path.home() / ".runelite" / "profiles2",
+    Path.home() / ".var" / "app" / "com.jagexlauncher.JagexLauncher" / "data" / "user_home" / ".runelite" / "profiles2",
+    Path.home() / ".var" / "app" / "com.jagex.Launcher" / ".runelite" / "profiles2",
+]
+
+# Keep for backwards compat — points to standalone dir
+RUNELITE_DIR = _RUNELITE_DIRS[0]
 RSPROFILE_FILE = RUNELITE_DIR / "$rsprofile--1.properties"
 
 
-def _read_rsprofile() -> dict[str, str]:
-    """Read the rsprofile properties file into a dict."""
-    if not RSPROFILE_FILE.exists():
+def _read_rsprofile_file(path: Path) -> dict[str, str]:
+    """Read a single rsprofile properties file into a dict."""
+    if not path.exists():
         return {}
     props = {}
-    with open(RSPROFILE_FILE, encoding="utf-8", errors="replace") as f:
+    with open(path, encoding="utf-8", errors="replace") as f:
         for line in f:
             line = line.strip()
             if "=" in line and not line.startswith("#"):
@@ -34,30 +46,50 @@ def _read_rsprofile() -> dict[str, str]:
     return props
 
 
+def _read_all_rsprofiles() -> list[dict[str, str]]:
+    """Read rsprofile properties from all known RuneLite directories."""
+    all_props = []
+    for profiles_dir in _RUNELITE_DIRS:
+        rsprofile = profiles_dir / "$rsprofile--1.properties"
+        props = _read_rsprofile_file(rsprofile)
+        if props:
+            all_props.append(props)
+    return all_props
+
+
+def _read_rsprofile() -> dict[str, str]:
+    """Read the rsprofile properties file into a dict.
+
+    For backwards compat, merges all known locations into one dict.
+    """
+    merged = {}
+    for props in _read_all_rsprofiles():
+        merged.update(props)
+    return merged
+
+
 def get_account_profiles() -> list[dict]:
-    """List all RuneLite accounts with display names."""
-    props = _read_rsprofile()
+    """List all RuneLite accounts with display names from all data locations."""
     accounts = {}
-    # Find display names
-    for key, value in props.items():
-        m = re.match(r"rsprofile\.rsprofile\.(\w+)\.displayName", key)
-        if m and value:
-            profile_hash = m.group(1)
-            if value not in accounts:
-                accounts[value] = profile_hash
+    for props in _read_all_rsprofiles():
+        for key, value in props.items():
+            m = re.match(r"rsprofile\.rsprofile\.([\w-]+)\.displayName", key)
+            if m and value:
+                profile_hash = m.group(1)
+                if value not in accounts:
+                    accounts[value] = profile_hash
     return [{"display_name": name, "profile_hash": h} for name, h in accounts.items()]
 
 
 def _find_profile_hash(username: str) -> str | None:
-    """Find the profile hash for a given display name."""
-    props = _read_rsprofile()
+    """Find the profile hash for a given display name across all locations."""
     username_lower = username.lower()
-    # Find most recent profile hash for this display name
     best_hash = None
-    for key, value in props.items():
-        m = re.match(r"rsprofile\.rsprofile\.(\w+)\.displayName", key)
-        if m and value.lower() == username_lower:
-            best_hash = m.group(1)
+    for props in _read_all_rsprofiles():
+        for key, value in props.items():
+            m = re.match(r"rsprofile\.rsprofile\.([\w-]+)\.displayName", key)
+            if m and value.lower() == username_lower:
+                best_hash = m.group(1)
     return best_hash
 
 
@@ -81,24 +113,25 @@ def _parse_bank_items(raw: str) -> list[tuple[int, int]]:
 def get_bank_raw(username: str) -> list[tuple[int, int]] | None:
     """Get raw bank contents (item_id, quantity pairs) for a username.
 
-    Reads from RuneLite Quest Helper's cached bank data. The bank data
+    Reads from RuneLite Quest Helper's cached bank data across all known
+    RuneLite directories (standalone + Jagex launcher). The bank data
     is updated whenever you open your bank in-game with Quest Helper enabled.
     """
-    props = _read_rsprofile()
     username_lower = username.lower()
 
-    # Find all profile hashes for this username, pick the one with most items
+    # Search all RuneLite locations, pick the profile with the most items
     best_items = None
-    for key, value in props.items():
-        m = re.match(r"rsprofile\.rsprofile\.(\w+)\.displayName", key)
-        if m and value.lower() == username_lower:
-            profile_hash = m.group(1)
-            bank_key = f"questhelper.rsprofile.{profile_hash}.bankitems"
-            raw = props.get(bank_key)
-            if raw and raw != "null":
-                items = _parse_bank_items(raw)
-                if best_items is None or len(items) > len(best_items):
-                    best_items = items
+    for props in _read_all_rsprofiles():
+        for key, value in props.items():
+            m = re.match(r"rsprofile\.rsprofile\.([\w-]+)\.displayName", key)
+            if m and value.lower() == username_lower:
+                profile_hash = m.group(1)
+                bank_key = f"questhelper.rsprofile.{profile_hash}.bankitems"
+                raw = props.get(bank_key)
+                if raw and raw != "null":
+                    items = _parse_bank_items(raw)
+                    if best_items is None or len(items) > len(best_items):
+                        best_items = items
 
     return best_items
 

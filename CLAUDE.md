@@ -11,6 +11,16 @@ The MCP tools have live data — use them.
 When the user asks an OSRS gameplay question, call the MCP tools. Do not say "I don't have the tools connected" —
 they ARE connected. Check `/mcp` if unsure.
 
+## Rules — Never Guess
+1. Any specific number (level requirement, drop rate, XP rate, price, KPH) **MUST** come from a tool call. Never state numbers from memory.
+2. Never list monster drops without calling `monster_drops()` or `drop_sources()`.
+3. Never state slayer level requirements without calling `monster_info()` or `slayer_unlocks()`. Training data frequently gets these wrong (e.g. Drakes are 84 Slayer, not 70).
+4. Never recommend boss gear without reading `read_wiki_page("Boss/Strategies")` first.
+5. Never describe training methods or XP rates without checking wiki or skilling tools.
+6. Never state GE prices without calling `item_price()`.
+7. If uncertain about any fact, say "let me check" and use the appropriate tool.
+8. Never fill knowledge gaps with training data — say "I couldn't find that in the tools" instead of guessing.
+
 ## Before Answering Any OSRS Question
 1. **Check the player's account first.** Call `player_stats` to get their levels, boss KCs, and account type (normal/ironman/hardcore/ultimate). This tells you what content they can actually do.
 2. **Check their gear.** Call `player_gear` to see their best-in-slot equipment per stat. Use `player_bank(search="item name")` to check for specific items. Don't recommend items they already have.
@@ -47,10 +57,24 @@ The user has 3 accounts: `die tmo`, `31k elite`, `thatcher98`. If they say "my i
 
 ### For item/drop questions:
 - `drop_sources(item)` — what monsters drop this item
+- `drop_sources("herb seeds")` — bulk lookup by category (also: "tree seeds", "fruit tree seeds", "rune items", "bolt tips")
+- `drop_sources("Ranarr seed, Snapdragon seed")` — comma-separated bulk lookup
 - `monster_drops(monster)` — what a monster drops
 - `item_info(item)` — full item details and bonuses
 - `item_price(item)` — current GE price
 - **NEVER state that a monster drops a specific item without verifying with `monster_drops()` or `drop_sources()`.** Training data is full of wrong drop attributions (e.g. Blood shard comes from Vyrewatch Sentinels, not Undead Druids). Always verify.
+
+### For "where do I get X?" questions:
+- `resource_sources(item)` — reads the wiki's "Item sources" table which has every source (monsters, skilling, thieving, shops, minigames) with level, quantity, and drop rate
+- `resource_sources("herb seeds")` — works with categories too (adds bulk drop table lookup)
+- Use this instead of `drop_sources` when you need complete source data with drop rates
+
+### For slayer questions:
+- `slayer_unlocks(level=65)` — what unlocks at exactly slayer level 65
+- `slayer_unlocks(min_level=40, max_level=60)` — range of unlocks
+- `slayer_unlocks(username="die tmo")` — auto-fetch slayer level, show all their unlocks
+- `slayer_unlocks(master="duradel")` — filter by master
+- **NEVER guess slayer level requirements.** Always use `slayer_unlocks()` or `monster_info()`.
 
 ### For "what's my KPH?" / boss setup questions:
 1. `boss_setup(boss, username)` — tests every weapon in their bank, picks best prayer/potion for their level, shows top 5 setups with DPS + KPH + weakness analysis

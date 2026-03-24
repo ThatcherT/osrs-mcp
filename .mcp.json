@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "osrs": {
-      "command": "uv",
+      "command": "/home/thatcher/.local/bin/uv",
       "args": ["run", "--directory", "/home/thatcher/projects/nov/projects/osrs-wiki-mcp", "python", "-m", "osrs_mcp.server"],
       "env": {}
     }

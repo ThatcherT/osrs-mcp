@@ -346,3 +346,103 @@ class TestBossRequirements:
         assert "drops" in result
         assert "wiki_url" in result
         assert "Vorkath" in result["wiki_url"]
+
+
+# === Bulk drop sources ===
+
+class TestDropSourcesBulk:
+    @respx.mock
+    async def test_drop_sources_category(self):
+        """Category keyword should trigger bulk lookup."""
+        route = respx.get("https://oldschool.runescape.wiki/api.php")
+        # Each of the 14 herb seeds triggers a separate bucket query
+        route.mock(return_value=httpx.Response(200, json={
+            "bucket": [{"page_name": "Aberrant spectre"}, {"page_name": "Chaos druid"}]
+        }))
+        result = await monsters.drop_sources("herb seeds")
+        assert isinstance(result, dict)
+        assert result["items_searched"] == 14
+        assert result["monsters_found"] > 0
+        # Each monster should list items it drops
+        for src in result["sources"]:
+            assert "monster" in src
+            assert "drops_matched" in src
+            assert "items" in src
+
+    @respx.mock
+    async def test_drop_sources_comma_separated(self):
+        route = respx.get("https://oldschool.runescape.wiki/api.php")
+        route.mock(return_value=httpx.Response(200, json={
+            "bucket": [{"page_name": "Aberrant spectre"}]
+        }))
+        result = await monsters.drop_sources("Ranarr seed, Snapdragon seed")
+        assert isinstance(result, dict)
+        assert result["items_searched"] == 2
+
+    @respx.mock
+    async def test_drop_sources_single_item_unchanged(self):
+        """Single item should still return the original list format."""
+        respx.get("https://oldschool.runescape.wiki/api.php").mock(
+            return_value=httpx.Response(200, json=MOCK_BUCKET_DROP_SOURCES)
+        )
+        result = await monsters.drop_sources("Abyssal whip")
+        assert isinstance(result, list)
+        assert result[0]["page_name"] == "Abyssal demon"
+
+    @respx.mock
+    async def test_drop_sources_bulk_empty(self):
+        respx.get("https://oldschool.runescape.wiki/api.php").mock(
+            return_value=httpx.Response(200, json={"bucket": []})
+        )
+        result = await monsters.drop_sources("herb seeds")
+        assert isinstance(result, list)
+        assert result[0].get("error")
+        assert "available_categories" in result[0]
+
+
+class TestResourceSources:
+    async def test_resource_sources_single_item_with_wiki(self):
+        """Single item should return wiki Item sources section."""
+        mock_wiki_page = AsyncMock(return_value={
+            "page": "Ranarr seed",
+            "url": "https://oldschool.runescape.wiki/w/Ranarr_seed",
+            "section": "Item sources",
+            "content": "Source | Level | Quantity | Rarity\nMoss giant | 42 | 1 | 1/98.3",
+        })
+        with patch("osrs_mcp.tools.general._read_wiki_page", mock_wiki_page):
+            result = await general.resource_sources("Ranarr seed")
+            assert result["query"] == "Ranarr seed"
+            assert "wiki_sources" in result
+            assert "wiki_url" in result
+            # Single item should NOT have bulk_sources
+            assert "bulk_sources" not in result
+
+    async def test_resource_sources_single_item_no_wiki(self):
+        """Single item with no wiki page should note that."""
+        mock_wiki_page = AsyncMock(return_value={
+            "page": "FakeItem",
+            "url": "https://oldschool.runescape.wiki/w/FakeItem",
+            "error": "Page 'FakeItem' not found.",
+        })
+        with patch("osrs_mcp.tools.general._read_wiki_page", mock_wiki_page):
+            result = await general.resource_sources("FakeItem")
+            assert "wiki_note" in result
+
+    async def test_resource_sources_category(self):
+        """Category keyword should do bulk lookup + wiki."""
+        mock_bulk = AsyncMock(return_value={
+            "Aberrant spectre": ["Ranarr seed", "Kwuarm seed"],
+            "Chaos druid": ["Ranarr seed"],
+        })
+        mock_wiki_page = AsyncMock(return_value={
+            "page": "herb seeds",
+            "url": "https://oldschool.runescape.wiki/w/herb_seeds",
+            "error": "Page 'herb seeds' not found.",
+        })
+        with patch("osrs_mcp.tools.general.get_drop_sources_bulk", mock_bulk), \
+             patch("osrs_mcp.tools.general._read_wiki_page", mock_wiki_page):
+            result = await general.resource_sources("herb seeds")
+            assert result["query"] == "herb seeds"
+            assert len(result["bulk_sources"]) == 2
+            assert result["bulk_sources"][0]["monster"] == "Aberrant spectre"
+            assert result["bulk_sources"][0]["drops_matched"] == 2

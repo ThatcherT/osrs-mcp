@@ -1,3 +1,5 @@
+import asyncio
+
 from osrs_mcp.api.base import get_client
 from osrs_mcp.cache import cache
 
@@ -230,6 +232,31 @@ async def get_drop_sources(item_name: str) -> list[dict]:
         where={"item_name": item_name},
         limit=500,
     )
+
+
+async def get_drop_sources_bulk(item_names: list[str]) -> dict[str, list[str]]:
+    """Get drop sources for multiple items concurrently.
+
+    Returns a dict of {monster_name: [items_it_drops]} sorted by match count descending.
+    """
+    results = await asyncio.gather(
+        *(get_drop_sources(name) for name in item_names)
+    )
+
+    # Aggregate: monster -> list of matched items
+    monster_items: dict[str, list[str]] = {}
+    for item_name, sources in zip(item_names, results):
+        for src in sources:
+            monster = src.get("page_name", "")
+            if monster:
+                monster_items.setdefault(monster, []).append(item_name)
+
+    # Sort by number of matched items descending, then alphabetically
+    sorted_monsters = sorted(
+        monster_items.items(),
+        key=lambda x: (-len(x[1]), x[0]),
+    )
+    return dict(sorted_monsters)
 
 
 async def get_quest_info(quest_name: str) -> dict | None:

@@ -3,9 +3,11 @@ from osrs_mcp.api.wiki_bucket import (
     get_monster_info as _get_monster_info,
     get_monster_drops as _get_monster_drops,
     get_drop_sources as _get_drop_sources,
+    get_drop_sources_bulk as _get_drop_sources_bulk,
     bucket_query,
     MONSTER_FIELDS,
 )
+from osrs_mcp.util.categories import expand_category, list_categories
 
 
 @mcp.tool()
@@ -43,16 +45,53 @@ async def monster_drops(monster_name: str) -> list[dict]:
 
 
 @mcp.tool()
-async def drop_sources(item_name: str) -> list[dict]:
-    """Find all monsters/NPCs that drop a specific item.
+async def drop_sources(item_name: str) -> list[dict] | dict:
+    """Find all monsters/NPCs that drop a specific item, or search by category.
+
+    Supports category keywords for bulk lookups:
+    - "herb seeds" — all 14 herb seeds (Guam through Torstol)
+    - "tree seeds" — Acorn, Willow, Maple, Yew, Magic, Spirit seeds
+    - "fruit tree seeds" — Apple through Dragonfruit tree seeds
+    - "rune items" — Death, Blood, Nature, Law, Soul, Wrath runes
+    - "bolt tips" — Opal through Onyx bolt tips
+
+    Also supports comma-separated items: "Ranarr seed, Snapdragon seed"
+
+    For categories/multiple items, returns monsters sorted by how many of the
+    queried items they drop (best sources first).
 
     Args:
-        item_name: The item name (e.g. "Abyssal whip", "Dragon bones", "Maple seed").
+        item_name: Item name, category keyword, or comma-separated item list.
     """
-    sources = await _get_drop_sources(item_name)
-    if not sources:
-        return [{"error": f"No drop sources found for '{item_name}'."}]
-    return sources
+    items = expand_category(item_name)
+
+    if len(items) == 1:
+        # Single item: existing behavior
+        sources = await _get_drop_sources(items[0])
+        if not sources:
+            return [{"error": f"No drop sources found for '{items[0]}'.",
+                      "available_categories": list_categories()}]
+        return sources
+
+    # Multiple items / category: bulk lookup
+    monster_items = await _get_drop_sources_bulk(items)
+    if not monster_items:
+        return [{"error": f"No drop sources found for '{item_name}'.",
+                  "available_categories": list_categories()}]
+
+    results = []
+    for monster, matched_items in monster_items.items():
+        results.append({
+            "monster": monster,
+            "drops_matched": len(matched_items),
+            "items": matched_items,
+        })
+    return {
+        "query": item_name,
+        "items_searched": len(items),
+        "monsters_found": len(results),
+        "sources": results,
+    }
 
 
 @mcp.tool()
