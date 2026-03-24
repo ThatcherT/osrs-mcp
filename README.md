@@ -1,27 +1,21 @@
-# OSRS MCP Server
+![Python](https://img.shields.io/badge/python-3.11+-blue)
+![MCP](https://img.shields.io/badge/protocol-MCP-purple)
 
-MCP server that gives Claude live OSRS data — player stats, gear, boss info, wiki pages, DPS calculations, and more. Ask it things like "what boss should I do next?" or "what's my best setup for Vorkath?" and it'll look up your actual account and answer with real data instead of guessing.
+# osrs-mcp
 
-## Getting Started
+MCP server that gives Claude live OSRS game data. Player stats, gear lookups, boss setups, DPS calculations, wiki pages, and GE prices from actual game APIs instead of stale training data.
+
+## Quick Start
 
 Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone <repo-url> && cd osrs-wiki-mcp
 uv sync
-cp config.example.json config.json  # edit with your RSN
+cp config.example.json config.json  # add your RSN(s)
 ```
 
-Edit `config.json`:
-```json
-{
-    "username": "your_rsn",
-    "accounts": ["your_rsn", "your_alt"],
-    "user_agent": "osrs-mcp/0.1.0 - your_contact_info"
-}
-```
+Add to Claude Code MCP config (`~/.claude/settings.json`):
 
-Add to your Claude Code MCP config (`~/.claude/settings.json`):
 ```json
 {
   "mcpServers": {
@@ -33,38 +27,31 @@ Add to your Claude Code MCP config (`~/.claude/settings.json`):
 }
 ```
 
-Restart Claude Code. The 19 tools will be available immediately.
-
 ## Tools
 
-| Tool | What it does |
+19 tools covering player accounts, items, monsters, bosses, DPS math, and wiki search. Highlights:
+
+| Tool | Purpose |
 |---|---|
-| `player_stats` | Levels, boss KCs, account type (ironman detection) |
-| `player_gear` | Best equipment per slot from RuneLite bank data |
-| `player_bank` | Search bank contents |
-| `player_gains` | Recent XP/KC gains via Wise Old Man |
-| `monster_info` | Monster stats and weaknesses |
-| `monster_drops` | What a monster drops |
-| `drop_sources` | What monsters drop an item |
-| `search_monsters` | Find monsters by name |
-| `item_info` | Item stats and bonuses |
+| `player_stats` | Levels, boss KCs, ironman detection |
+| `player_gear` | Best equipment from RuneLite bank data |
+| `calc_dps` | DPS calculator with real player stats |
+| `boss_setup` | Auto ranks every weapon in your bank vs a boss |
+| `compare_weapons` | Side by side weapon DPS comparison |
+| `monster_drops` | Full drop table for any monster |
 | `item_price` | Live GE price |
-| `search_items` | Find items by name |
-| `calc_dps` | DPS calculator with your stats and gear |
-| `compare_weapons` | Side-by-side weapon DPS comparison |
-| `suggest_loadout` | Auto-rank every weapon in your bank vs a boss |
-| `boss_requirements` | Boss info + drops |
-| `quest_info` | Quest requirements and details |
-| `read_wiki_page` | Fetch wiki page content by section |
-| `search_wiki` | Search the OSRS Wiki |
-| `money_making_methods` | Money making methods from the wiki |
+| `read_wiki_page` | Fetch wiki content by section |
 
-## Bank Data (Optional)
+## Testing
 
-`player_gear`, `player_bank`, and `suggest_loadout` read your bank from RuneLite's local data. To set this up:
+```bash
+uv run pytest
+```
 
-1. Install the **Quest Helper** plugin in RuneLite
-2. Open your bank in-game with the plugin enabled
-3. Bank data is saved locally — no API needed
+## Stack
 
-Without this, the tools that need bank data will tell you it's unavailable. Everything else works without it.
+- Python 3.11+, uv
+- MCP protocol (`mcp[cli]`)
+- httpx for async HTTP
+- Pydantic for data validation
+- OSRS Wiki API, Wise Old Man API, RuneLite local data
