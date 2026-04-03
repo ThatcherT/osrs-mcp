@@ -4,8 +4,6 @@
       "command": "uv",
       "args": [
         "run",
-        "--directory",
-        "/home/thatcher/projects/softwaresoftware/projects/osrs-wiki-mcp",
         "python",
         "-m",
         "osrs_mcp.server"
